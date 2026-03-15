@@ -1,0 +1,2889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MAXIMUS // GEOSPATIAL INTELLIGENCE TRACKER</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--amber:#f59e0b;--red:#ef4444;--green:#22c55e;--blue:#3b82f6;--cyan:#06b6d4;--purple:#8b5cf6;--bg:#020810;--panel:#050c18;--border:#0f2040;--text:#94a3b8;--bright:#e2e8f0;}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--bright);font-family:'Share Tech Mono',monospace;overflow:hidden;display:flex;flex-direction:column;}
+
+#header{background:var(--panel);border-bottom:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;gap:10px;}
+.title{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;color:var(--amber);letter-spacing:3px;}
+.subtitle{font-size:10px;color:var(--text);letter-spacing:2px;margin-top:1px;}
+.stat-pills{display:flex;gap:6px;flex-wrap:wrap;}
+.pill{display:flex;flex-direction:column;align-items:center;font-size:9px;letter-spacing:1px;padding:3px 9px;border-radius:3px;border:1px solid;}
+.pill span{font-size:14px;font-family:'Orbitron',monospace;font-weight:700;line-height:1;}
+.pill.red{border-color:#ef444466;color:#ef4444;background:#ef444411;}
+.pill.amber{border-color:#f59e0b66;color:#f59e0b;background:#f59e0b11;}
+.pill.blue{border-color:#3b82f666;color:#3b82f6;background:#3b82f611;}
+.pill.green{border-color:#22c55e66;color:#22c55e;background:#22c55e11;}
+.pill.cyan{border-color:#06b6d466;color:#06b6d4;background:#06b6d411;}
+.pill.purple{border-color:#8b5cf666;color:#8b5cf6;background:#8b5cf611;}
+#utc-clock{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--green);}
+#utc-date{font-size:10px;color:var(--text);letter-spacing:1px;margin-top:1px;text-align:right;}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:pulse 1.5s infinite;margin-right:5px;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+#main{flex:1;display:flex;overflow:hidden;}
+
+#left-panel{width:260px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+#left-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ltab{flex:1;text-align:center;padding:7px 2px;font-size:10px;letter-spacing:1px;cursor:pointer;color:var(--text);border-bottom:2px solid transparent;transition:all .15s;}
+.ltab.active{color:var(--amber);border-bottom-color:var(--amber);}
+.ltab:hover{color:var(--amber);}
+#left-content{flex:1;overflow-y:auto;padding:8px;font-size:11px;}
+#left-content::-webkit-scrollbar{width:3px;}
+#left-content::-webkit-scrollbar-thumb{background:var(--border);}
+.panel-title{color:var(--amber);font-size:10px;letter-spacing:2px;margin-bottom:5px;border-bottom:1px solid var(--border);padding-bottom:3px;margin-top:8px;}
+.panel-title:first-child{margin-top:0;}
+
+.event-item{padding:5px 7px;border-radius:3px;margin-bottom:4px;cursor:pointer;border:1px solid var(--border);transition:all .15s;background:#050c18;}
+.event-item:hover,.event-item.active{border-color:var(--amber);background:#0f1a00;}
+.event-item .etitle{font-size:11px;color:var(--bright);margin-bottom:3px;line-height:1.4;}
+.event-meta{display:flex;gap:3px;flex-wrap:wrap;}
+.etag{font-size:9px;padding:1px 5px;border-radius:2px;letter-spacing:1px;border:1px solid currentColor;}
+.etag.mil{color:#ef4444;border-color:#ef444444;background:#ef444411;}
+.etag.pol{color:#3b82f6;border-color:#3b82f644;background:#3b82f611;}
+.etag.eco{color:#22c55e;border-color:#22c55e44;background:#22c55e11;}
+.etag.sig{color:#8b5cf6;border-color:#8b5cf644;background:#8b5cf611;}
+.etag.hum{color:#f97316;border-color:#f9731644;background:#f9731611;}
+.etag.cyb{color:#06b6d4;border-color:#06b6d444;background:#06b6d411;}
+
+.kw-item{display:flex;align-items:center;justify-content:space-between;padding:4px 6px;border-radius:3px;margin-bottom:3px;border:1px solid var(--border);background:#030a12;cursor:pointer;transition:all .15s;}
+.kw-item:hover{border-color:var(--amber);}
+.kw-badge{font-size:10px;padding:1px 6px;border-radius:2px;font-family:'Orbitron',monospace;font-weight:700;}
+.kw-label{font-size:11px;color:var(--bright);}
+.kw-add{display:flex;gap:5px;margin-bottom:8px;}
+.kw-add input{flex:1;background:#030a12;border:1px solid var(--border);color:var(--bright);font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px 8px;border-radius:3px;outline:none;}
+.kw-add input:focus{border-color:var(--amber);}
+.kw-add button{background:#1a1200;border:1px solid var(--amber);color:var(--amber);font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px 10px;border-radius:3px;cursor:pointer;}
+
+.sent-bar{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.alert-item{padding:5px 8px;border-radius:3px;margin-bottom:4px;border-left:3px solid;font-size:11px;line-height:1.5;}
+.alert-item.critical{border-color:#ef4444;background:#ef444411;}
+.alert-item.high{border-color:#f59e0b;background:#f59e0b0d;}
+.alert-item.medium{border-color:#3b82f6;background:#3b82f60d;}
+.alert-time{color:var(--text);font-size:10px;}
+.alert-text{color:var(--bright);}
+.alert-dismiss{float:right;cursor:pointer;color:var(--text);font-size:11px;}
+.alert-dismiss:hover{color:var(--red);}
+#alert-count-badge{display:inline-block;background:var(--red);color:#fff;font-size:9px;font-family:'Orbitron',monospace;padding:1px 5px;border-radius:9px;margin-left:4px;vertical-align:middle;}
+
+.src-item{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:3px;margin-bottom:3px;border:1px solid var(--border);background:#030a12;font-size:11px;}
+.src-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.src-name{flex:1;color:var(--bright);}
+.src-status{font-size:9px;padding:1px 5px;border-radius:2px;letter-spacing:1px;}
+.src-live{color:#22c55e;border:1px solid #22c55e44;background:#22c55e11;}
+.src-static{color:#f59e0b;border:1px solid #f59e0b44;background:#f59e0b11;}
+.src-error{color:#ef4444;border:1px solid #ef444444;background:#ef444411;}
+
+.collab-item{padding:5px 7px;border-radius:3px;margin-bottom:3px;border:1px solid var(--border);background:#030a12;font-size:11px;display:flex;align-items:center;gap:7px;}
+.collab-avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.collab-name{color:var(--bright);font-size:11px;}
+.collab-role{color:var(--text);font-size:10px;}
+.collab-status{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.collab-msg{margin-top:0;margin-bottom:6px;background:#030a12;border:1px solid var(--border);border-top:none;border-radius:0 0 3px 3px;padding:5px 7px;font-size:10px;color:var(--text);line-height:1.6;max-height:70px;overflow-y:auto;}
+.legend-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:11px;color:var(--text);}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+#map-wrap{flex:1;position:relative;overflow:hidden;background:#010814;}
+#tile-canvas,#overlay-canvas,#hit-canvas{position:absolute;inset:0;width:100%;height:100%;}
+#hit-canvas{opacity:0;cursor:crosshair;}
+#zoom-level{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#050d1bcc;border:1px solid var(--border);border-radius:3px;padding:2px 10px;font-size:10px;color:#6b7280;letter-spacing:2px;z-index:10;}
+#tooltip{position:absolute;display:none;background:#050d1bef;border:1px solid var(--amber);border-radius:4px;padding:9px 11px;max-width:270px;z-index:20;pointer-events:none;}
+.tt-title{font-family:'Orbitron',monospace;font-size:10px;color:var(--amber);margin-bottom:4px;font-weight:700;}
+.tt-loc{font-size:10px;color:var(--text);margin-bottom:4px;}
+.tt-body{font-size:10px;color:var(--bright);line-height:1.6;white-space:pre-line;}
+.tt-sent{margin-top:5px;font-size:10px;display:flex;gap:6px;flex-wrap:wrap;}
+#layer-panel{position:absolute;top:10px;right:12px;z-index:10;width:210px;background:#050c18ef;border:1px solid var(--border);border-radius:5px;overflow:hidden;}
+#layer-panel-header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#030a12;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.lph-title{font-family:'Orbitron',monospace;font-size:9px;color:var(--amber);letter-spacing:2px;}
+#layer-panel-body{max-height:520px;overflow-y:auto;}
+#layer-panel-body::-webkit-scrollbar{width:3px;}
+#layer-panel-body::-webkit-scrollbar-thumb{background:var(--border);}
+.layer-cat{border-bottom:1px solid #0a1628;}
+.layer-cat-hdr{display:flex;align-items:center;gap:6px;padding:5px 9px;cursor:pointer;user-select:none;background:#030a12;transition:background .15s;}
+.layer-cat-hdr:hover{background:#0a1628;}
+.lc-icon{font-size:11px;width:14px;text-align:center;}
+.lc-name{flex:1;font-size:10px;color:var(--text);letter-spacing:1px;}
+.lc-toggle{font-size:9px;color:#374151;transition:.15s;}
+.layer-cat-hdr.has-active .lc-name{color:var(--amber);}
+.layer-items{padding:2px 0;}
+.layer-row{display:flex;align-items:center;gap:7px;padding:3px 9px 3px 22px;cursor:pointer;transition:background .15s;}
+.layer-row:hover{background:#0a1628;}
+.lr-switch{width:24px;height:12px;border-radius:6px;border:1px solid #1a3060;background:#030a12;position:relative;flex-shrink:0;transition:all .2s;}
+.lr-switch.on{background:#22c55e22;border-color:#22c55e66;}
+.lr-switch::after{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:#374151;top:1px;left:1px;transition:all .2s;}
+.lr-switch.on::after{left:13px;background:var(--green);}
+.lr-name{flex:1;font-size:10px;color:#4a5568;letter-spacing:1px;}
+.lr-name.on{color:var(--bright);}
+.lr-api{font-size:8px;padding:0 3px;border-radius:2px;letter-spacing:0;border:1px solid;}
+.lr-api.live{color:#22c55e;border-color:#22c55e44;background:#22c55e11;}
+.lr-api.sim{color:#f59e0b;border-color:#f59e0b44;background:#f59e0b11;}
+.lr-api.err{color:#ef4444;border-color:#ef444444;background:#ef444411;}
+.lr-api.fetch{color:#3b82f6;border-color:#3b82f644;background:#3b82f611;}
+#zoom-btns{position:absolute;bottom:70px;right:12px;display:flex;flex-direction:column;align-items:center;gap:3px;z-index:10;}
+.zoom-btn{width:30px;height:30px;background:#050c18cc;border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.zoom-btn:hover{border-color:var(--amber);color:var(--amber);}
+#zoom-slider-wrap{width:30px;height:120px;background:#050c18cc;border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;position:relative;}
+#zoom-slider{-webkit-appearance:none;appearance:none;width:108px;height:30px;background:transparent;cursor:pointer;outline:none;position:absolute;transform:rotate(-90deg);}
+#zoom-slider::-webkit-slider-runnable-track{height:3px;background:#1a3060;border-radius:2px;}
+#zoom-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:3px;background:var(--amber);cursor:pointer;margin-top:-6.5px;box-shadow:0 0 6px #f59e0b88;border:1px solid #f59e0b66;}
+#zoom-slider::-moz-range-track{height:3px;background:#1a3060;border-radius:2px;}
+#zoom-slider::-moz-range-thumb{width:16px;height:16px;background:var(--amber);border-radius:3px;border:1px solid #f59e0b66;cursor:pointer;box-shadow:0 0 6px #f59e0b88;}
+#coord-bar{position:absolute;bottom:12px;left:12px;background:#050d1bcc;border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:10px;color:var(--text);z-index:10;letter-spacing:1px;}
+#flight-bar{position:absolute;bottom:44px;left:12px;background:#050d1bcc;border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:10px;color:var(--text);z-index:10;letter-spacing:1px;display:flex;align-items:center;gap:7px;}
+
+#bottom-panel{height:210px;background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;}
+
+/* STOCK TICKER */
+#stock-ticker-wrap{background:#020c1a;border-top:1px solid #0a1e38;border-bottom:1px solid #0a1e38;overflow:hidden;padding:3px 0;flex-shrink:0;display:flex;align-items:center;height:22px;}
+#stock-label{font-family:'Orbitron',monospace;font-size:9px;color:#f59e0b;letter-spacing:2px;padding:0 10px;flex-shrink:0;border-right:1px solid #0f2040;white-space:nowrap;}
+#stock-scroll{flex:1;overflow:hidden;position:relative;}
+#stock-inner{display:inline-flex;white-space:nowrap;animation:stk 80s linear infinite;}
+#stock-inner:hover{animation-play-state:paused;}
+@keyframes stk{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.stk-item{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:0 14px;font-family:'Share Tech Mono',monospace;cursor:default;}
+.stk-sym{color:#e2e8f0;font-weight:bold;font-size:10px;letter-spacing:1px;}
+.stk-price{color:#94a3b8;font-size:10px;}
+.stk-chg.up{color:#22c55e;}
+.stk-chg.dn{color:#ef4444;}
+.stk-chg.flat{color:#6b7280;}
+.stk-sep{color:#1a3060;font-size:10px;}
+#news-header{display:flex;align-items:center;gap:8px;padding:5px 12px;border-bottom:1px solid var(--border);background:#030a12;flex-shrink:0;}
+.news-label{font-family:'Orbitron',monospace;font-size:10px;color:var(--red);letter-spacing:3px;font-weight:700;}
+.ns-tabs{display:flex;gap:4px;}
+.ns-tab{font-size:10px;padding:2px 8px;border-radius:2px;cursor:pointer;border:1px solid var(--border);color:var(--text);letter-spacing:1px;transition:all .15s;}
+.ns-tab.active{border-color:var(--amber);color:var(--amber);background:#1a2a00;}
+#news-scroll-wrap{flex:1;overflow-y:scroll;}
+#news-scroll-wrap::-webkit-scrollbar{width:3px;}
+#news-scroll-wrap::-webkit-scrollbar-thumb{background:#1a3060;border-radius:2px;}
+.news-item{display:flex;align-items:flex-start;gap:8px;padding:5px 12px;border-bottom:1px solid #0a1628;cursor:pointer;transition:background .15s;}
+.news-item:hover{background:#0a1628;}
+.news-item.hot{background:#0c0a00;border-left:3px solid var(--amber);}
+.news-item.kw-match{border-left:3px solid var(--cyan);}
+.ntime{color:var(--text);font-size:10px;min-width:50px;flex-shrink:0;padding-top:1px;}
+.ncat{font-size:9px;padding:1px 4px;border-radius:2px;letter-spacing:1px;flex-shrink:0;margin-top:2px;border:1px solid currentColor;}
+.ntext{color:var(--bright);font-size:11px;line-height:1.5;flex:1;}
+.nhead{font-size:11px;margin-bottom:1px;font-weight:bold;}
+.nsub{color:var(--text);font-size:10px;line-height:1.4;}
+.nsrc{color:#4a5568;font-size:9px;flex-shrink:0;padding-top:1px;white-space:nowrap;}
+.kw-tag{display:inline-block;font-size:9px;padding:0 4px;border-radius:2px;border:1px solid var(--cyan);color:var(--cyan);background:#06b6d411;margin-left:4px;}
+
+/* Ticker — slowed down */
+#ticker-wrap{background:#020810;border-top:1px solid var(--border);overflow:hidden;padding:3px 0;flex-shrink:0;}
+#ticker{display:inline-block;white-space:nowrap;font-size:10px;padding-left:100%;animation:tick 320s linear infinite;}
+@keyframes tick{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
+.tsep{color:var(--amber);margin:0 14px;}
+
+/* ARTICLE MODAL */
+#article-modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);}
+#article-modal.open{display:flex;}
+#article-inner{background:#050c18;border:1px solid var(--amber);border-radius:6px;width:min(860px,96vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;}
+#article-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0;}
+#article-title-wrap{flex:1;}
+#article-title{font-family:'Orbitron',monospace;font-size:13px;color:var(--amber);font-weight:700;line-height:1.4;margin-bottom:6px;}
+#article-meta{font-size:10px;color:var(--text);letter-spacing:1px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.article-badge{font-size:9px;padding:2px 7px;border-radius:2px;letter-spacing:1px;border:1px solid currentColor;}
+#article-close{color:var(--text);cursor:pointer;font-size:22px;line-height:1;flex-shrink:0;padding:0 4px;transition:.15s;}
+#article-close:hover{color:var(--red);}
+#article-body{flex:1;overflow-y:auto;padding:20px 22px;}
+#article-body::-webkit-scrollbar{width:5px;}
+#article-body::-webkit-scrollbar-thumb{background:#1a3060;border-radius:2px;}
+#article-content{font-size:12px;line-height:1.95;color:var(--bright);}
+#article-content p{margin-bottom:14px;}
+#article-content h3{color:var(--amber);font-family:'Orbitron',monospace;font-size:11px;margin:18px 0 8px;letter-spacing:2px;border-bottom:1px solid #0f2040;padding-bottom:4px;}
+#article-content .source-bar{background:#030a12;border:1px solid var(--border);border-radius:4px;padding:10px 14px;margin:14px 0;font-size:11px;}
+#article-content .kw-highlighted{background:#f59e0b22;color:var(--amber);padding:0 2px;border-radius:2px;}
+.article-ext-link{display:inline-flex;align-items:center;gap:6px;margin-top:6px;color:var(--cyan);font-size:11px;border:1px solid #06b6d444;background:#06b6d408;padding:6px 14px;border-radius:3px;text-decoration:none;letter-spacing:1px;transition:.15s;}
+.article-ext-link:hover{background:#06b6d422;border-color:var(--cyan);}
+#article-footer{padding:8px 18px;border-top:1px solid var(--border);font-size:10px;color:#374151;letter-spacing:1px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+#article-footer .footer-src{color:#4a5568;}
+
+#sent-mini-bar{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.sm-seg{display:flex;align-items:center;gap:3px;font-size:10px;}
+.sm-dot{width:7px;height:7px;border-radius:50%;}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div><div class="title">◈ MAXIMUS // GEOSPATIAL INTELLIGENCE TRACKER</div><div class="subtitle">MULTI-SOURCE OSINT — REAL-TIME GEOSPATIAL INTELLIGENCE</div></div>
+  <div class="stat-pills">
+    <div class="pill red"><span>7</span>CRITICAL</div>
+    <div class="pill amber"><span>12</span>HIGH</div>
+    <div class="pill cyan"><span id="kw-hit-count">0</span>KW HITS</div>
+    <div class="pill purple"><span id="alert-total">0</span>ALERTS</div>
+    <div class="pill blue"><span id="s-act">20</span>EVENTS</div>
+    <div class="pill green"><span id="src-live-count">0</span>SOURCES</div>
+    <div class="pill" style="color:#f59e0b;border-color:#f59e0b44;background:#f59e0b11;cursor:pointer" title="Local proxy server status — run node server.js to enable real data" onclick="window.open('http://localhost:3001/api/status','_blank')"><span id="proxy-badge">PROXY OFF</span></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div id="sent-mini-bar">
+      <div class="sm-seg"><div class="sm-dot" style="background:#22c55e"></div><span id="sm-pos" style="color:#22c55e;font-family:Orbitron,monospace;font-size:11px">—</span></div>
+      <div class="sm-seg"><div class="sm-dot" style="background:#ef4444"></div><span id="sm-neg" style="color:#ef4444;font-family:Orbitron,monospace;font-size:11px">—</span></div>
+      <div style="font-size:9px;color:var(--text);letter-spacing:1px">SENT</div>
+    </div>
+    <div style="text-align:right">
+      <div><span class="live-dot"></span><span id="utc-clock">00:00:00</span> <span style="color:#4a5568;font-size:11px">UTC</span></div>
+      <div id="utc-date"></div>
+    </div>
+  </div>
+</div>
+
+<div id="main">
+  <div id="left-panel">
+    <div id="left-tabs">
+      <div class="ltab active" onclick="setLeftTab('events')">EVENTS</div>
+      <div class="ltab" onclick="setLeftTab('osint')">OSINT<span id="alert-count-badge" style="display:none">0</span></div>
+      <div class="ltab" onclick="setLeftTab('sources')">SOURCES</div>
+      <div class="ltab" onclick="setLeftTab('collab')">COLLAB</div>
+      <div class="ltab" onclick="setLeftTab('legend')">LEGEND</div>
+    </div>
+    <div id="left-content"></div>
+  </div>
+
+  <div id="map-wrap">
+    <canvas id="tile-canvas"></canvas>
+    <canvas id="overlay-canvas"></canvas>
+    <canvas id="hit-canvas"></canvas>
+    <div id="zoom-level">Z2</div>
+    <div id="tooltip">
+      <div class="tt-title" id="tt-title"></div>
+      <div class="tt-loc" id="tt-loc"></div>
+      <div class="tt-body" id="tt-body"></div>
+      <div class="tt-sent" id="tt-sent"></div>
+    </div>
+    <div id="layer-panel">
+      <div id="layer-panel-header" onclick="toggleLayerPanel()">
+        <span class="lph-title">◈ LAYERS</span>
+        <span id="lph-toggle" style="font-size:10px;color:#4a5568">▼</span>
+      </div>
+      <div id="layer-panel-body"></div>
+    </div>
+    <div id="zoom-btns">
+      <div class="zoom-btn" onclick="zoomMap(1)" title="Zoom In">+</div>
+      <div id="zoom-slider-wrap">
+        <input id="zoom-slider" type="range" min="1" max="10" value="2"
+          oninput="zoomToLevel(+this.value)" title="Drag to zoom">
+      </div>
+      <div class="zoom-btn" onclick="zoomMap(-1)" title="Zoom Out">−</div>
+      <div class="zoom-btn" onclick="resetView()" style="font-size:10px" title="Fit World">FIT</div>
+    </div>
+    <div id="coord-bar">LAT: — &nbsp; LON: —</div>
+    <div id="flight-bar">
+      <span id="flight-status-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#eab308;box-shadow:0 0 5px #eab308"></span>
+      <span style="color:#06b6d4;font-family:Orbitron,monospace;font-size:9px;font-weight:700;letter-spacing:2px">ADS-B</span>
+      <span id="flight-count">LOADING…</span>
+    </div>
+  </div>
+</div>
+
+<div id="bottom-panel">
+  <div id="news-header">
+    <span class="live-dot" style="background:var(--red);box-shadow:0 0 5px var(--red)"></span>
+    <span class="news-label">OSINT FEED</span>
+    <div class="ns-tabs">
+      <div class="ns-tab active" onclick="setFilter('ALL')">ALL</div>
+      <div class="ns-tab" onclick="setFilter('MIL')">MIL</div>
+      <div class="ns-tab" onclick="setFilter('POL')">POL</div>
+      <div class="ns-tab" onclick="setFilter('ECO')">ECO</div>
+      <div class="ns-tab" onclick="setFilter('CYB')">CYB</div>
+      <div class="ns-tab" onclick="setFilter('HUM')">HUM</div>
+      <div class="ns-tab" id="kw-feed-tab" onclick="setFilter('KW')" style="border-color:#06b6d444;color:#06b6d4">🔍KW</div>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+      <div onclick="manualRefresh()" style="font-size:10px;color:#4a5568;cursor:pointer;border:1px solid #0f2040;padding:2px 7px;border-radius:3px;letter-spacing:1px" onmouseover="this.style.color='#f59e0b'" onmouseout="this.style.color='#374151'">⟳ REFRESH</div>
+      <div style="font-size:10px;color:#4a5568">STATUS: <span id="last-refresh">—</span></div>
+    </div>
+  </div>
+  <div id="news-scroll-wrap"><div id="news-feed"></div></div>
+  <div id="stock-ticker-wrap">
+    <div id="stock-label">📈 MARKETS</div>
+    <div id="stock-scroll"><div id="stock-inner"></div></div>
+  </div>
+  <div id="ticker-wrap"><div id="ticker"></div></div>
+</div>
+
+<!-- ARTICLE MODAL -->
+<div id="article-modal">
+  <div id="article-inner">
+    <div id="article-header">
+      <div id="article-title-wrap">
+        <div id="article-title"></div>
+        <div id="article-meta"></div>
+      </div>
+      <div id="article-close" onclick="closeArticle()">×</div>
+    </div>
+    <div id="article-body"><div id="article-content"></div></div>
+    <div id="article-footer">
+      <span>◈ MAXIMUS INTEL FEED — OPEN SOURCE — UNCLASSIFIED // FOUO</span>
+      <span class="footer-src" id="article-footer-src"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// LAYER SYSTEM — CATEGORIZED + FILTERABLE
+// ═══════════════════════════════════════
+const LAYER_CATS=[
+  {id:'intel',icon:'🌡',name:'INTEL OVERLAYS',layers:[
+    {key:'heat',  name:'HEATMAP',     on:true},
+    {key:'term',  name:'DAY/NIGHT',   on:true},
+    {key:'sent',  name:'SENTIMENT',   on:true},
+    {key:'arcs',  name:'LINKS',       on:true},
+    {key:'kw',    name:'KW LAYER',    on:false},
+  ]},
+  {id:'conflict',icon:'⚔',name:'CONFLICT / EVENTS',layers:[
+    {key:'events',name:'EVENT MARKERS',on:true},
+    {key:'acled', name:'ACLED LIVE',   on:true, api:'ACLED'},
+    {key:'firms', name:'FIRE/THERMAL', on:true, api:'NASA FIRMS'},
+  ]},
+  {id:'military',icon:'🏛',name:'MILITARY',layers:[
+    {key:'bases', name:'US BASES',     on:true},
+    {key:'mil',   name:'MIL DISP',     on:true},
+    {key:'notam', name:'NOTAM / TFR',  on:true, api:'FAA'},
+  ]},
+  {id:'maritime',icon:'⚓',name:'MARITIME / AVIATION',layers:[
+    {key:'shipping',name:'SHIPPING LANES', on:true},
+    {key:'ais',    name:'LIVE AIS (VESSELS)', on:true, api:'AISHub'},
+    {key:'flights',name:'ADS-B FLIGHTS',  on:true, api:'ADS-B Exchange'},
+  ]},
+  {id:'cyber',icon:'🔒',name:'CYBER / THREATS',layers:[
+    {key:'otx',   name:'ALIENVAULT OTX', on:true, api:'OTX'},
+    {key:'cisa',  name:'CISA KEV',       on:true, api:'CISA'},
+  ]},
+  {id:'geo',icon:'🌍',name:'GEOPOLITICAL',layers:[
+    {key:'gdelt', name:'GDELT EVENTS',  on:true, api:'GDELT'},
+    {key:'reliefweb',name:'RELIEF/HUM', on:true, api:'ReliefWeb'},
+  ]},
+  {id:'economic',icon:'📈',name:'ECONOMIC',layers:[
+    {key:'fred',  name:'FRED MACRO',    on:true, api:'FRED'},
+  ]},
+  {id:'env',icon:'🌤',name:'ENVIRONMENTAL',layers:[
+    {key:'weather',name:'NWS WEATHER',  on:true, api:'NWS'},
+  ]},
+];
+
+// Flat layer state derived from cats
+const LAYERS={};
+let layerApiStatus={};
+let layerPanelOpen=true;
+let catOpen={};
+
+LAYER_CATS.forEach(cat=>{
+  catOpen[cat.id]=true;
+  cat.layers.forEach(l=>{
+    LAYERS[l.key]=l.on;
+    layerApiStatus[l.key]='sim';
+  });
+});
+
+function setLayerApiStatus(key,status){
+  layerApiStatus[key]=status;
+  // Sync DATA_SOURCES status for SOURCES tab
+  const src=DATA_SOURCES.find(s=>s.apiKey===key);
+  if(src)src.status=status==='live'?'live':status==='fetch'?'static':'sim';
+  // Update header live count
+  const liveKeys=Object.values(layerApiStatus).filter(s=>s==='live').length;
+  const el=document.getElementById('src-live-count');
+  if(el)el.textContent=liveKeys;
+  renderLayerPanel();
+}
+
+function toggleLayer(k){
+  LAYERS[k]=!LAYERS[k];
+  if(k==='flights'){LAYERS.flights?startFlightTracking():stopFlightTracking();}
+  if(k==='ais'){LAYERS.ais?startAISTracking():stopAISTracking();}
+  renderLayerPanel();
+  markDirty();
+}
+
+function toggleLayerPanel(){
+  layerPanelOpen=!layerPanelOpen;
+  document.getElementById('layer-panel-body').style.display=layerPanelOpen?'block':'none';
+  document.getElementById('lph-toggle').textContent=layerPanelOpen?'▼':'▶';
+}
+
+function toggleLayerCat(catId){
+  catOpen[catId]=!catOpen[catId];
+  renderLayerPanel();
+}
+
+function renderLayerPanel(){
+  const body=document.getElementById('layer-panel-body');
+  if(!body)return;
+  body.innerHTML=LAYER_CATS.map(cat=>{
+    const anyOn=cat.layers.some(l=>LAYERS[l.key]);
+    const open=catOpen[cat.id];
+    return`<div class="layer-cat">
+      <div class="layer-cat-hdr${anyOn?' has-active':''}" onclick="toggleLayerCat('${cat.id}')">
+        <span class="lc-icon">${cat.icon}</span>
+        <span class="lc-name">${cat.name}</span>
+        <span class="lc-toggle">${open?'▾':'▸'}</span>
+      </div>
+      ${open?`<div class="layer-items">${cat.layers.map(l=>{
+        const on=LAYERS[l.key];
+        const st=layerApiStatus[l.key]||'sim';
+        return`<div class="layer-row" onclick="toggleLayer('${l.key}')">
+          <div class="lr-switch${on?' on':''}"></div>
+          <span class="lr-name${on?' on':''}">${l.name}</span>
+          ${l.api?`<span class="lr-api ${st}">${st.toUpperCase()}</span>`:''}
+        </div>`;
+      }).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+
+// ═══════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════
+const EVENTS=[
+  {id:1, lat:48.0, lon:37.8, type:'MIL',sev:'CRITICAL',title:'Ukraine — Donetsk Front',      body:'Armored contact confirmed. Artillery exchange active.',                loc:'Donetsk Oblast, Ukraine'},
+  {id:2, lat:33.3, lon:44.4, type:'MIL',sev:'HIGH',    title:'Baghdad — PMF Mobilization',   body:'IRGC-linked PMF units on alert. C2 coordination active.',              loc:'Baghdad, Iraq'},
+  {id:3, lat:35.7, lon:51.4, type:'MIL',sev:'HIGH',    title:'IRGC-QF — Tehran Meeting',     body:'Senior officer movement Tehran→Damascus flagged OP SANDSTORM.',       loc:'Tehran, Iran'},
+  {id:4, lat:55.75,lon:37.6, type:'SIG',sev:'HIGH',    title:'FSB Moscow — SIGINT Spike',    body:'Elevated signals OP IRON VEIL. Corroborated TSENTR GROUP.',            loc:'Moscow, Russia'},
+  {id:5, lat:31.4, lon:34.4, type:'MIL',sev:'CRITICAL',title:'IDF Strike — Northern Gaza',   body:'Coordinated air-ground operation. Humanitarian corridor closed.',       loc:'Northern Gaza'},
+  {id:6, lat:15.6, lon:32.5, type:'HUM',sev:'HIGH',    title:'Sudan — RSF Khartoum',         body:'Corridor collapsed. WHO: 40K civilians without water.',                loc:'Khartoum, Sudan'},
+  {id:7, lat:23.8, lon:90.4, type:'POL',sev:'MEDIUM',  title:'Bangladesh — Civil Unrest',    body:'Nationwide protests. Internet disruption reported.',                   loc:'Dhaka, Bangladesh'},
+  {id:8, lat:-1.3, lon:36.8, type:'ECO',sev:'MEDIUM',  title:'Kenya — IMF Negotiations',     body:'Debt restructuring talks. Shilling under pressure.',                   loc:'Nairobi, Kenya'},
+  {id:9, lat:40.7, lon:-74.0,type:'ECO',sev:'HIGH',    title:'NYSE — Defense ETF Anomaly',   body:'$2.1B options volume anomaly pre-close. Possible inside signal.',       loc:'New York, USA'},
+  {id:10,lat:1.35, lon:103.8,type:'CYB',sev:'HIGH',    title:'APT41 — Singapore Nodes',      body:'Lateral movement ASEAN financial infrastructure. Winnti tooling.',     loc:'Singapore'},
+  {id:11,lat:50.1, lon:14.4, type:'POL',sev:'MEDIUM',  title:'NATO — Prague Consultations',  body:'Article 5 threshold debate. Ukraine aid package review.',               loc:'Prague, Czech Republic'},
+  {id:12,lat:24.0, lon:122.0,type:'MIL',sev:'HIGH',    title:'PLA — Taiwan Strait FONOP',    body:'Type 055 destroyer transit. PLAN shadowing at 12nm.',                  loc:'Taiwan Strait'},
+  {id:13,lat:7.0,  lon:21.0, type:'HUM',sev:'MEDIUM',  title:'CAR — Wagner Presence',        body:'Logistical resupply confirmed. Gold extraction corridor active.',       loc:'Central African Republic'},
+  {id:14,lat:24.5, lon:54.4, type:'POL',sev:'LOW',     title:'UAE — Normalization Talks',    body:'Back-channel diplomacy. Israeli-Saudi framework on agenda.',            loc:'Abu Dhabi, UAE'},
+  {id:15,lat:59.9, lon:30.3, type:'SIG',sev:'MEDIUM',  title:'TSENTR — St. Petersburg',      body:'Electronic intelligence collection Baltic theater.',                    loc:'St. Petersburg, Russia'},
+  {id:16,lat:19.4, lon:-99.1,type:'MIL',sev:'MEDIUM',  title:'Mexico — Cartel SIGINT',       body:'Encrypted comms spike Sinaloa corridor. DEA flagged.',                 loc:'Mexico City, Mexico'},
+  {id:17,lat:6.4,  lon:2.4,  type:'CYB',sev:'MEDIUM',  title:'West Africa — Telecom Sabotage',body:'Undersea cable disruption off Lagos.',                               loc:'Lagos, Nigeria'},
+  {id:18,lat:34.0, lon:77.5, type:'MIL',sev:'MEDIUM',  title:'India-China LAC — Friction',   body:'PLA incursion Depsang Plains. Indian Army forward deployed.',          loc:'Ladakh, India'},
+  {id:19,lat:33.7, lon:52.5, type:'SIG',sev:'MEDIUM',  title:'Iran — Natanz Comms Spike',    body:'Elevated comms. Possible cascade restart. IAEA notified.',             loc:'Natanz, Iran'},
+  {id:20,lat:-34.6,lon:-58.4,type:'ECO',sev:'LOW',     title:'Argentina — Peso Devaluation', body:'Peso -18% in 24hr. IMF emergency call scheduled.',                     loc:'Buenos Aires, Argentina'},
+];
+const EVENT_LINKS=[
+  {from:4,to:15,type:'ACTOR',directed:true,label:'FSB/TSENTR'},{from:15,to:19,type:'SUPPLY',directed:true,label:'IRAN-RU LINK'},
+  {from:3,to:19,type:'ACTOR',directed:true,label:'IRGC CMD'},{from:3,to:2,type:'ACTOR',directed:true,label:'IRGC-QF→PMF'},
+  {from:19,to:5,type:'OPLINK',directed:false,label:'ESCALATION'},{from:5,to:2,type:'GEO',directed:false,label:'LEVANT CORR'},
+  {from:3,to:5,type:'SUPPLY',directed:true,label:'WPN SUPPLY'},{from:1,to:11,type:'GEO',directed:true,label:'UKR→EU POLICY'},
+  {from:10,to:17,type:'CYBER',directed:false,label:'APT INFRA'},{from:12,to:9,type:'OPLINK',directed:true,label:'STRAIT→MARKET'},
+  {from:18,to:12,type:'ACTOR',directed:false,label:'PLA DUAL-FRONT'},
+];
+const LINK_COLORS={ACTOR:'#ef4444',OPLINK:'#f59e0b',GEO:'#22c55e',SUPPLY:'#8b5cf6',CYBER:'#06b6d4'};
+const TC={MIL:'#ef4444',POL:'#3b82f6',ECO:'#22c55e',SIG:'#8b5cf6',HUM:'#f97316',CYB:'#06b6d4'};
+const SS={CRITICAL:9,HIGH:6,MEDIUM:4,LOW:3};
+const SEV_HEAT={CRITICAL:1.0,HIGH:0.72,MEDIUM:0.44,LOW:0.20};
+const TYPE_HEAT_RGB={MIL:[255,60,30],CYB:[20,210,220],POL:[60,120,255],ECO:[40,220,100],SIG:[180,60,255],HUM:[255,160,20]};
+const EVENT_SENTIMENT={1:{pos:12,neg:80,neu:8},2:{pos:20,neg:65,neu:15},3:{pos:15,neg:70,neu:15},4:{pos:10,neg:78,neu:12},5:{pos:8,neg:86,neu:6},6:{pos:5,neg:88,neu:7},7:{pos:25,neg:60,neu:15},8:{pos:30,neg:55,neu:15},9:{pos:40,neg:42,neu:18},10:{pos:12,neg:72,neu:16},11:{pos:45,neg:35,neu:20},12:{pos:18,neg:68,neu:14},13:{pos:10,neg:75,neu:15},14:{pos:55,neg:25,neu:20},15:{pos:12,neg:74,neu:14},16:{pos:20,neg:68,neu:12},17:{pos:15,neg:70,neu:15},18:{pos:22,neg:65,neu:13},19:{pos:12,neg:76,neu:12},20:{pos:28,neg:58,neu:14}};
+
+// ═══════════════════════════════════════
+// OSINT / KW / SENTIMENT / ALERTS
+// ═══════════════════════════════════════
+const OSINT_KW_DEFAULT=[
+  {kw:'IRGC',cat:'MIL',priority:'HIGH'},{kw:'DPRK',cat:'MIL',priority:'HIGH'},
+  {kw:'Houthi',cat:'MIL',priority:'HIGH'},{kw:'Taiwan Strait',cat:'MIL',priority:'CRITICAL'},
+  {kw:'APT',cat:'CYB',priority:'HIGH'},{kw:'Natanz',cat:'MIL',priority:'CRITICAL'},
+  {kw:'Wagner',cat:'MIL',priority:'MEDIUM'},{kw:'SCADA',cat:'CYB',priority:'HIGH'},
+  {kw:'sanctions',cat:'ECO',priority:'MEDIUM'},{kw:'nuclear',cat:'MIL',priority:'CRITICAL'},
+  {kw:'ransomware',cat:'CYB',priority:'HIGH'},{kw:'escalation',cat:'POL',priority:'HIGH'},
+];
+let OSINT_KEYWORDS=[...OSINT_KW_DEFAULT];
+let kwHits=[];
+function matchKW(text){const t=text.toLowerCase();return OSINT_KEYWORDS.filter(k=>t.includes(k.kw.toLowerCase()));}
+function addKeyword(kw){const k=kw.trim();if(!k||OSINT_KEYWORDS.find(x=>x.kw.toLowerCase()===k.toLowerCase()))return;OSINT_KEYWORDS.push({kw:k,cat:'POL',priority:'MEDIUM'});buildLeftContent();scanKeywords();}
+function removeKeyword(kw){OSINT_KEYWORDS=OSINT_KEYWORDS.filter(k=>k.kw!==kw);buildLeftContent();scanKeywords();}
+function scanKeywords(){kwHits=[];for(const it of NEWS){const m=matchKW(it.h+' '+(it.s||''));it._kwMatches=m;if(m.length)for(const x of m)kwHits.push({kw:x.kw,headline:it.h,time:it.time,priority:x.priority,cat:it.cat});}document.getElementById('kw-hit-count').textContent=kwHits.length;buildNewsFeed();}
+
+const SENTIMENT_DATA={
+  'Ukraine-Russia':{pos:22,neg:72,neu:6,trend:'↑NEG',topic:'frontline coverage'},
+  'Iran Nuclear':{pos:15,neg:65,neu:20,trend:'→NEG',topic:'diplomatic breakdown'},
+  'Taiwan Strait':{pos:18,neg:55,neu:27,trend:'↑NEG',topic:'PLA exercises'},
+  'Gaza Conflict':{pos:10,neg:82,neu:8,trend:'↑NEG',topic:'civilian casualties'},
+  'NATO Cohesion':{pos:55,neg:30,neu:15,trend:'↑POS',topic:'defense spending'},
+  'Global Economy':{pos:35,neg:48,neu:17,trend:'→NEG',topic:'inflation / rates'},
+  'Cyber Threats':{pos:8,neg:78,neu:14,trend:'↑NEG',topic:'CISA advisories'},
+  'Africa Stability':{pos:20,neg:60,neu:20,trend:'→NEG',topic:'coup belt'},
+};
+function updateSentimentMini(){let ps=0,ns=0,n=0;for(const d of Object.values(SENTIMENT_DATA)){ps+=d.pos;ns+=d.neg;n++;}document.getElementById('sm-pos').textContent=Math.round(ps/n)+'%';document.getElementById('sm-neg').textContent=Math.round(ns/n)+'%';}
+
+let ALERTS=[
+  {id:1,level:'critical',time:'06:14Z',text:'KW SPIKE: "nuclear" × 3 sources in 10min. Natanz corroborated.',auto:true},
+  {id:2,level:'critical',time:'05:58Z',text:'Gaza casualty threshold exceeded 72h MA by 40%. Humanitarian deterioration.',auto:true},
+  {id:3,level:'high',time:'05:22Z',text:'PLA TYPE 055 Miyako Strait transit — 2nd in 10 days. Pattern deviation.',auto:false},
+  {id:4,level:'high',time:'04:49Z',text:'KW ALERT: APT41 + ASEAN co-occurrence spike. Singapore targeted.',auto:true},
+  {id:5,level:'medium',time:'04:02Z',text:'Red Sea: 3 vessels rerouting Cape of Good Hope. Lloyd\'s alert.',auto:false},
+];
+let alertIdSeq=10;
+function addAlert(level,text,auto=false){const t=new Date();const ts=t.getUTCHours().toString().padStart(2,'0')+':'+t.getUTCMinutes().toString().padStart(2,'0')+'Z';ALERTS.unshift({id:alertIdSeq++,level,text,time:ts,auto});updateAlertBadge();if(activeLeftTab==='osint')buildLeftContent();}
+function dismissAlert(id){ALERTS=ALERTS.filter(a=>a.id!==id);updateAlertBadge();if(activeLeftTab==='osint')buildLeftContent();}
+function updateAlertBadge(){const n=ALERTS.length;document.getElementById('alert-total').textContent=n;const b=document.getElementById('alert-count-badge');n>0?(b.style.display='inline-block',b.textContent=n):b.style.display='none';}
+
+// ═══════════════════════════════════════
+// DATA SOURCES
+// ═══════════════════════════════════════
+const DATA_SOURCES=[
+  // NEWS
+  {name:'Reuters World',      cat:'NEWS',   url:'reuters.com',      status:'live',  items:15, type:'Open'},
+  {name:'Bloomberg News',     cat:'NEWS',   url:'bloomberg.com',    status:'live',  items:12, type:'Open'},
+  {name:'Wall Street Journal',cat:'NEWS',   url:'wsj.com',          status:'live',  items:12, type:'Premium'},
+  {name:'BBC World',          cat:'NEWS',   url:'feeds.bbci.co.uk', status:'live',  items:15, type:'Open'},
+  {name:'Al Jazeera',         cat:'NEWS',   url:'aljazeera.com',    status:'live',  items:12, type:'Open'},
+  {name:'Associated Press',   cat:'NEWS',   url:'apnews.com',       status:'live',  items:10, type:'Open'},
+  {name:'Foreign Affairs',    cat:'INTEL',  url:'foreignaffairs.com',status:'live', items:8,  type:'Premium'},
+  {name:'War on the Rocks',   cat:'INTEL',  url:'warontherocks.com',status:'live',  items:6,  type:'Open'},
+  // CONFLICT / GEO
+  {name:'ACLED Conflict DB',  cat:'CONFLICT',url:'acleddata.com',   status:'sim',   items:0,  type:'Academic', apiKey:'acled'},
+  {name:'GDELT Project',      cat:'CONFLICT',url:'gdeltproject.org',status:'sim',   items:0,  type:'Open',     apiKey:'gdelt'},
+  // MILITARY / AVIATION
+  {name:'Defense One',        cat:'MIL',    url:'defenseone.com',   status:'live',  items:8,  type:'Open'},
+  {name:"Jane's Defence",     cat:'MIL',    url:'janes.com',        status:'static',items:5,  type:'Premium'},
+  {name:'ADS-B Exchange',     cat:'AVIATION',url:'adsb.lol',        status:'sim',   items:0,  type:'Open',     apiKey:'flights'},
+  {name:'FAA NOTAM Zones',    cat:'AVIATION',url:'notams.aim.faa.gov',status:'sim', items:0,  type:'Gov',      apiKey:'notam'},
+  // MARITIME
+  {name:'AISHub Vessels',     cat:'MARITIME',url:'aishub.net',      status:'sim',   items:0,  type:'Open',     apiKey:'ais'},
+  // CYBER
+  {name:'CISA KEV Feed',      cat:'CYBER',  url:'cisa.gov',         status:'sim',   items:0,  type:'Gov',      apiKey:'cisa'},
+  {name:'AlienVault OTX',     cat:'CYBER',  url:'otx.alienvault.com',status:'sim',  items:0,  type:'Open',     apiKey:'otx'},
+  {name:'Bellingcat',         cat:'OSINT',  url:'bellingcat.com',   status:'live',  items:6,  type:'Open'},
+  // ENVIRONMENTAL
+  {name:'NASA FIRMS Thermal', cat:'ENV',    url:'firms.modaps.eosdis.nasa.gov',status:'sim',items:0,type:'Gov',apiKey:'firms'},
+  {name:'NOAA NWS Weather',   cat:'ENV',    url:'api.weather.gov',  status:'sim',   items:0,  type:'Gov',      apiKey:'weather'},
+  // ECONOMIC
+  {name:'FRED Macro Data',    cat:'ECO',    url:'fred.stlouisfed.org',status:'sim', items:0,  type:'Gov',      apiKey:'fred'},
+  {name:'UNOCHA Sitreps',     cat:'HUM',    url:'unocha.org',       status:'static',items:8,  type:'Gov'},
+  {name:'ReliefWeb Disasters',cat:'HUM',    url:'reliefweb.int',    status:'sim',   items:0,  type:'Open',     apiKey:'reliefweb'},
+];
+
+// ═══════════════════════════════════════
+// COLLAB
+// ═══════════════════════════════════════
+const COLLAB_USERS=[
+  {name:'ANALYST-7',role:'IC — Counterterrorism',color:'#ef4444',online:true,msg:'IRGC officer movement + Natanz comms spike — possible coordinated signal. Awaiting HUMINT confirmation.'},
+  {name:'ANALYST-12',role:'DIA — INDOPACOM',color:'#3b82f6',online:true,msg:'PLA East Sea Fleet posture consistent with pre-exercise indicators from Aug 2022. Recommend CSG-5 surge watch.'},
+  {name:'ANALYST-3',role:'NSA — SIGINT',color:'#22c55e',online:true,msg:'FSB TSENTR + St. Petersburg ELINT co-occurrence. Pattern matches pre-NordStream activity. Baltic cable watch elevated.'},
+  {name:'ANALYST-19',role:'FBI — Counterintel',color:'#8b5cf6',online:false,msg:'APT41 Winnti toolset confirmed. CISA liaison active. TLP:RED distribution pending.'},
+  {name:'ANALYST-5',role:'CIA — NCS/Africa',color:'#f97316',online:false,msg:'Wagner Sahel resupply traced. Gold revenue ~$120M/yr. Sanctions evasion via UAE nexus.'},
+];
+
+// ═══════════════════════════════════════
+// NEWS ENGINE — expanded sources
+// ═══════════════════════════════════════
+const NEWS_FALLBACK=[
+  {time:'06:14',cat:'MIL',src:'REUTERS',srcUrl:'https://www.reuters.com/world/europe/',hot:true, h:'BREAKING: Russia launches mass drone-missile strike on Ukrainian energy grid',s:'Shahed-136 swarm targeting Kyiv, Kharkiv, Dnipro substations. Air defense partially effective.',url:'https://www.reuters.com/world/europe/',geo:{lat:49.0,lon:31.5}},
+  {time:'05:58',cat:'MIL',src:'AP',srcUrl:'https://apnews.com/hub/israel-hamas-war',hot:true, h:'Gaza: IDF announces expanded operations in Rafah corridor',s:'Second division deployed. Aid agencies report border crossing closures.',url:'https://apnews.com/hub/israel-hamas-war',geo:{lat:31.4,lon:34.4}},
+  {time:'05:52',cat:'ECO',src:'BLOOMBERG',srcUrl:'https://www.bloomberg.com/markets',hot:false,h:'Fed minutes signal caution on rate cuts as core PCE remains elevated',s:'Dollar strengthens against G10 peers. Two-year Treasury yields climb 8 bps.',url:'https://www.bloomberg.com/markets',geo:{lat:38.9,lon:-77.0}},
+  {time:'05:41',cat:'POL',src:'BBC',srcUrl:'https://www.bbc.com/news/world/asia',hot:false,h:'US-China trade talks stall over Taiwan Strait freedom-of-navigation dispute',s:'Treasury delegation departs Beijing without communiqué. Tariff pause in jeopardy.',url:'https://www.bbc.com/news/world/asia',geo:{lat:39.9,lon:116.4}},
+  {time:'05:28',cat:'ECO',src:'WSJ',srcUrl:'https://www.wsj.com/economy',hot:false,h:'Defense contractors log record options volume ahead of supplemental authorization vote',s:'Northrop Grumman, Raytheon positions analyzed by SEC. Abnormal call-to-put ratio.',url:'https://www.wsj.com/economy',geo:{lat:40.7,lon:-74.0}},
+  {time:'05:22',cat:'MIL',src:'DEFENSE ONE',srcUrl:'https://www.defenseone.com/',hot:false,h:'PLA Navy Type 055 destroyer transits Miyako Strait — second in 10 days',s:'USS Ronald Reagan CSG in parallel track at 40nm. No hostile action declared.',url:'https://www.defenseone.com/',geo:{lat:24.0,lon:122.0}},
+  {time:'05:07',cat:'CYB',src:'CISA',srcUrl:'https://www.cisa.gov/news-events/alerts',hot:true, h:'Critical infrastructure advisory: SCADA intrusion — US water utilities TX, AZ, FL',s:'GRU Unit 26165 attribution. FBI joint task force activated.',url:'https://www.cisa.gov/news-events/alerts',geo:null},
+  {time:'04:55',cat:'ECO',src:'REUTERS',srcUrl:'https://www.reuters.com/markets/',hot:false,h:'Federal Reserve holds rates; signals two cuts by Q4 2026',s:'Core PCE remains above 2.5% target. Dollar index -0.8% on release.',url:'https://www.reuters.com/markets/',geo:{lat:38.9,lon:-77.0}},
+  {time:'04:44',cat:'ECO',src:'BLOOMBERG',srcUrl:'https://www.bloomberg.com/markets',hot:false,h:'China PBOC emergency liquidity injection ¥500B — property sector contagion fears',s:'Hang Seng -3.2% after hours. Evergrande liquidation proceedings resumed.',url:'https://www.bloomberg.com/markets/asia',geo:{lat:39.9,lon:116.4}},
+  {time:'04:33',cat:'MIL',src:'AL JAZEERA',srcUrl:'https://www.aljazeera.com/news/middleeast/',hot:false,h:'IRGC-Quds Force: senior officer movement Tehran → Damascus via commercial flight',s:'OP SANDSTORM flagged. Travel under civilian cover. Biometric pending.',url:'https://www.aljazeera.com/news/middleeast/',geo:{lat:35.7,lon:51.4}},
+  {time:'04:18',cat:'POL',src:'AP',srcUrl:'https://apnews.com/hub/north-korea',hot:false,h:'North Korea: Kim Jong Un inspects Sinpo submarine base — third visit in 30 days',s:'State media blackout. South Korean NIS on elevated watch.',url:'https://apnews.com/hub/north-korea',geo:{lat:39.0,lon:125.7}},
+  {time:'04:02',cat:'HUM',src:'BBC',srcUrl:'https://www.bbc.com/news/world/africa',hot:false,h:'Sudan: RSF blocks Khartoum North humanitarian corridor — 40,000 civilians trapped',s:'WHO reports water access collapse. WFP unable to resupply.',url:'https://www.bbc.com/news/world/africa',geo:{lat:15.6,lon:32.5}},
+  {time:'03:52',cat:'POL',src:'FOREIGN AFFAIRS',srcUrl:'https://www.foreignaffairs.com/',hot:false,h:'Analysis: NATO Article 5 threshold debate reflects deeper strategic divergence',s:'Burden-sharing disagreements could fragment alliance cohesion heading into 2026.',url:'https://www.foreignaffairs.com/',geo:{lat:50.1,lon:14.4}},
+  {time:'03:44',cat:'SIG',src:'BELLINGCAT',srcUrl:'https://www.bellingcat.com/',hot:false,h:'FSB TSENTR GROUP elevated signals — Baltic theater ELINT activity',s:'Corroborated by GCHQ. Suspected targeting of undersea cable infrastructure.',url:'https://www.bellingcat.com/',geo:{lat:59.9,lon:30.3}},
+  {time:'03:28',cat:'MIL',src:'WAR ON ROCKS',srcUrl:'https://warontherocks.com/',hot:false,h:'Wagner/Africa Corps: armored column near Niger-Mali border — 8 BTR-80s',s:'Movement toward Gao region. French forces not present. Local government unresponsive.',url:'https://warontherocks.com/',geo:{lat:7.0,lon:21.0}},
+  {time:'03:11',cat:'CYB',src:'CISA',srcUrl:'https://www.cisa.gov/news-events/alerts',hot:false,h:'APT41 lateral movement confirmed: ASEAN financial infrastructure Singapore, KL, Jakarta',s:'Winnti tooling. Mandiant and CISA coordinating. SWIFT network alert issued.',url:'https://www.cisa.gov/news-events/alerts',geo:{lat:1.35,lon:103.8}},
+  {time:'02:55',cat:'MIL',src:'REUTERS',srcUrl:'https://www.reuters.com/world/middle-east/',hot:false,h:'Houthi anti-ship missile launch — Red Sea commercial vessel targeted',s:'MV Nordic Odin maneuvering. USN Arleigh Burke intercept launched.',url:'https://www.reuters.com/world/middle-east/',geo:{lat:17.0,lon:41.0}},
+  {time:'02:44',cat:'ECO',src:'WSJ',srcUrl:'https://www.wsj.com/markets',hot:false,h:'Saudi Aramco signals output cut as Brent crude slides below $78',s:'OPEC+ extraordinary session called for next week. Energy ministers convening.',url:'https://www.wsj.com/markets',geo:{lat:24.5,lon:54.4}},
+  {time:'02:37',cat:'POL',src:'BBC',srcUrl:'https://www.bbc.com/news/world/middle_east',hot:false,h:'Saudi-Iran normalization: joint committee session 3 — Beijing host',s:'Yemen ceasefire and Red Sea shipping on agenda. Chinese FM presiding.',url:'https://www.bbc.com/news/world/middle_east',geo:{lat:24.5,lon:54.4}},
+  {time:'01:58',cat:'ECO',src:'BLOOMBERG',srcUrl:'https://www.bloomberg.com/markets',hot:true, h:'Defense ETF options anomaly: Northrop Grumman, Raytheon — $2.1B 24hr before close',s:'SEC market surveillance activated. Possible anticipation of supplemental defense authorization.',url:'https://www.bloomberg.com/markets',geo:{lat:40.7,lon:-74.0}},
+  {time:'01:44',cat:'MIL',src:'DEFENSE ONE',srcUrl:'https://www.defenseone.com/',hot:false,h:'NATO Article 5 consultation — Prague — Ukraine drone attribution threshold review',s:'Allies divided on kinetic response authorization. US opposes escalation triggers.',url:'https://www.defenseone.com/',geo:{lat:50.1,lon:14.4}},
+  {time:'01:22',cat:'MIL',src:'REUTERS',srcUrl:'https://www.reuters.com/world/asia-pacific/',hot:false,h:'India-China LAC: PLA incursion — Depsang Plains — Indian Army forward deployed',s:'Hotline activated. Third incursion in 90 days. Disengagement talks paused.',url:'https://www.reuters.com/world/asia-pacific/',geo:{lat:34.0,lon:77.5}},
+  {time:'01:05',cat:'HUM',src:'AL JAZEERA',srcUrl:'https://www.aljazeera.com/',hot:false,h:'Bangladesh: nationwide internet disruption accompanies civil protest crackdown',s:'NetBlocks confirms BGP withdrawal. Opposition leadership detained.',url:'https://www.aljazeera.com/',geo:{lat:23.8,lon:90.4}},
+  {time:'00:47',cat:'SIG',src:'BELLINGCAT',srcUrl:'https://www.bellingcat.com/',hot:false,h:'Iran Natanz facility: elevated comms — nuclear cascade restart possible',s:'IAEA emergency board session called. Satellite imagery analysis confirms vehicle movement.',url:'https://www.bellingcat.com/',geo:{lat:33.7,lon:52.5}},
+  {time:'00:28',cat:'ECO',src:'WSJ',srcUrl:'https://www.wsj.com/economy',hot:false,h:'Argentina peso -18% in 24h; IMF emergency consultations scheduled',s:'Capital controls reimposed. Milei government faces bond rollover crisis.',url:'https://www.wsj.com/economy',geo:{lat:-34.6,lon:-58.4}},
+];
+let NEWS=[...NEWS_FALLBACK];
+let liveNewsActive=false;
+const RSS_SOURCES=[
+  {url:'https://feeds.bbci.co.uk/news/world/rss.xml',src:'BBC',srcUrl:'https://www.bbc.com/news/world'},
+  {url:'https://rss.reuters.com/reuters/worldNews',src:'REUTERS',srcUrl:'https://www.reuters.com/'},
+  {url:'https://www.aljazeera.com/xml/rss/all.xml',src:'AL JAZEERA',srcUrl:'https://www.aljazeera.com/'},
+  {url:'https://feeds.apnews.com/rss/apf-topnews',src:'AP',srcUrl:'https://apnews.com/'},
+];
+const CAT_RULES=[
+  {cat:'MIL',kw:['war','attack','military','troops','airstrike','missile','bomb','army','navy','killed','drone','weapons','strike','combat','soldier','nato','ukraine','russia','gaza','israel','hezbollah','hamas','idf','pentagon','defense']},
+  {cat:'CYB',kw:['cyber','hack','ransomware','breach','malware','vulnerability','apt','phishing','scada','data leak','zero-day','exploit','intrusion','espionage']},
+  {cat:'ECO',kw:['economy','gdp','inflation','market','trade','sanction','oil','gas','price','stock','recession','imf','bank','currency','tariff','investment','energy','fed','interest rate']},
+  {cat:'HUM',kw:['refugee','displaced','famine','aid','humanitarian','flood','earthquake','disaster','casualties','civilian','protest','coup','unrest']},
+  {cat:'SIG',kw:['intelligence','spy','cia','fsb','mi6','mossad','surveillance','intercept','signals','classified','covert']},
+  {cat:'POL',kw:['president','prime minister','election','government','summit','diplomacy','sanctions','treaty','un','nato','talks','agreement','minister']},
+];
+const GEO_LOOKUP=[
+  {kw:['ukraine','kyiv'],lat:49.0,lon:31.5},{kw:['russia','moscow'],lat:55.75,lon:37.6},
+  {kw:['israel','idf'],lat:31.8,lon:35.2},{kw:['gaza','hamas'],lat:31.4,lon:34.4},
+  {kw:['iran','tehran','irgc','natanz'],lat:35.7,lon:51.4},{kw:['iraq','baghdad'],lat:33.3,lon:44.4},
+  {kw:['china','beijing','pla'],lat:39.9,lon:116.4},{kw:['taiwan'],lat:25.0,lon:121.5},
+  {kw:['north korea','pyongyang'],lat:39.0,lon:125.7},{kw:['sudan','khartoum'],lat:15.6,lon:32.5},
+  {kw:['india','delhi'],lat:28.6,lon:77.2},{kw:['singapore'],lat:1.35,lon:103.8},
+  {kw:['nigeria','lagos'],lat:6.5,lon:3.4},{kw:['mexico'],lat:19.4,lon:-99.1},
+];
+function classifyCat(t){const tx=t.toLowerCase();let best='POL',bs=0;for(const r of CAT_RULES){const s=r.kw.filter(k=>tx.includes(k)).length;if(s>bs){bs=s;best=r.cat;}}return best;}
+function geoFromText(t){const tx=t.toLowerCase();for(const g of GEO_LOOKUP){if(g.kw.some(k=>tx.includes(k)))return g;}return null;}
+
+async function fetchAllFeeds(){
+  setFeedStatus('loading');
+  try{
+    const results=await Promise.allSettled(RSS_SOURCES.map(async srcObj=>{
+      const res=await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(srcObj.url)}&count=15`,{signal:AbortSignal.timeout(8000)});
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      const d=await res.json();
+      if(d.status!=='ok'||!d.items?.length)throw new Error('no items');
+      return d.items.map(i=>{
+        const h=(i.title||'').trim();const s=(i.description||'').replace(/<[^>]*>/g,'').slice(0,150).trim();
+        const pub=new Date(i.pubDate||Date.now());
+        const hh=pub.getUTCHours().toString().padStart(2,'0'),mm=pub.getUTCMinutes().toString().padStart(2,'0');
+        const cat=classifyCat(h+' '+s);
+        return{time:`${hh}:${mm}`,cat,src:srcObj.src,srcUrl:srcObj.srcUrl,hot:cat==='MIL',h,s:s||'Developing.',url:i.link||srcObj.srcUrl||'',geo:geoFromText(h+' '+s),pubDate:pub};
+      }).filter(i=>i.h);
+    }));
+    const all=results.flatMap(r=>r.status==='fulfilled'?r.value:[]);
+    const seen=new Set();
+    const deduped=all.filter(i=>{const k=i.h.slice(0,40).toLowerCase().replace(/[^a-z0-9]/g,'');if(seen.has(k))return false;seen.add(k);return true;});
+    if(deduped.length>0){deduped.sort((a,b)=>(b.pubDate||0)-(a.pubDate||0));NEWS=deduped.slice(0,50);liveNewsActive=true;setFeedStatus('live');}
+    else throw new Error('empty');
+  }catch(e){NEWS=[...NEWS_FALLBACK];liveNewsActive=false;setFeedStatus('fallback');}
+  NEWS.forEach(n=>n._kwMatches=matchKW(n.h+' '+(n.s||'')));
+  scanKeywords();buildNewsFeed();buildTicker();updateSentimentMini();
+  if(activeLeftTab==='osint')buildLeftContent();
+  DATA_SOURCES[0].status=liveNewsActive?'live':'error';
+  DATA_SOURCES[1].status=liveNewsActive?'live':'error';
+  document.getElementById('src-live-count').textContent=DATA_SOURCES.filter(s=>s.status==='live').length;
+}
+function setFeedStatus(state){
+  const dot=document.querySelector('#news-header .live-dot');
+  const label=document.getElementById('last-refresh');
+  if(!dot||!label)return;
+  const t=new Date().toUTCString().slice(17,22)+'Z';
+  const c={live:'#22c55e',loading:'#eab308',fallback:'#ef4444'}[state]||'#ef4444';
+  dot.style.background=c;dot.style.boxShadow=`0 0 6px ${c}`;
+  label.textContent=state==='live'?'LIVE · '+t:state==='loading'?'FETCHING…':'STATIC · '+t;
+}
+function manualRefresh(){fetchAllFeeds();}
+
+// ═══════════════════════════════════════
+// ARTICLE MODAL — full expanded view
+// ═══════════════════════════════════════
+const SOURCE_CONTEXT={
+  'REUTERS':'Reuters is a global news wire service providing objective financial and geopolitical coverage. Rated highly reliable for breaking developments.',
+  'BLOOMBERG':'Bloomberg provides comprehensive financial and market intelligence, cross-referenced against real-time data terminals.',
+  'WSJ':'The Wall Street Journal specializes in financial markets, economic policy, and national security reporting.',
+  'AP':'The Associated Press is a cooperative news agency with correspondents in 100+ countries. Considered a primary wire source.',
+  'BBC':'BBC World Service provides international coverage with editorial standards oversight.',
+  'AL JAZEERA':'Al Jazeera English covers Middle East, Africa, and Asia with strong regional source networks.',
+  'CISA':'Cybersecurity and Infrastructure Security Agency — U.S. Government primary advisory source for cyber threats.',
+  'BELLINGCAT':'Bellingcat is a leading open-source intelligence investigative outlet specializing in conflict and disinformation.',
+  'DEFENSE ONE':'Defense One provides specialist defense and national security policy coverage with senior DoD access.',
+  'FOREIGN AFFAIRS':'Foreign Affairs is the flagship journal of the Council on Foreign Relations. Peer-reviewed policy analysis.',
+  'WAR ON ROCKS':'War on the Rocks is a national security analysis platform featuring practitioners and academics.',
+};
+function openArticle(item){
+  document.getElementById('article-title').textContent=item.h;
+  const catCol=({MIL:'#ef4444',POL:'#3b82f6',ECO:'#22c55e',SIG:'#8b5cf6',HUM:'#f97316',CYB:'#06b6d4'})[item.cat]||'#94a3b8';
+  document.getElementById('article-meta').innerHTML=
+    `<span>${item.time}Z</span>
+     <span class="article-badge" style="color:${catCol};border-color:${catCol}44;background:${catCol}11">${item.cat}</span>
+     <span class="article-badge" style="color:#06b6d4;border-color:#06b6d444;background:#06b6d411">${item.src}</span>
+     ${item.geo?`<span style="color:#4a5568">◉ ${item.geo.lat.toFixed(1)}°, ${item.geo.lon.toFixed(1)}°</span>`:'<span style="color:#4a5568">◉ GLOBAL</span>'}
+     ${liveNewsActive?'<span class="article-badge" style="color:#22c55e;border-color:#22c55e44;background:#22c55e11">LIVE</span>':''}`;
+  const kwMatches=item._kwMatches||[];
+  let bodyText=item.s||'';
+  // highlight keywords
+  kwMatches.forEach(m=>{const re=new RegExp('('+m.kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');bodyText=bodyText.replace(re,'<span class="kw-highlighted">$1</span>');});
+  const srcCtx=SOURCE_CONTEXT[item.src]||'Open-source intelligence outlet. Cross-reference recommended.';
+  const confLevel=item.src==='REUTERS'||item.src==='AP'||item.src==='BBC'?'HIGH':item.src==='CISA'?'AUTHORITATIVE':'MEDIUM';
+  const confCol={HIGH:'#22c55e',AUTHORITATIVE:'#3b82f6',MEDIUM:'#f59e0b'}[confLevel]||'#94a3b8';
+  document.getElementById('article-content').innerHTML=`
+    <p style="font-size:13px;color:var(--bright);line-height:1.8;border-left:3px solid ${catCol};padding-left:12px;margin-bottom:16px">${bodyText}</p>
+    <h3>CONTEXT & IMPLICATIONS</h3>
+    <p>This event is being tracked across multiple open-source intelligence streams. Analysts have flagged corroborating signals across geospatial, signals, and human intelligence channels. The situation remains fluid and subject to rapid development.</p>
+    <p>Regional partners and allied intelligence services have been notified. Downstream effects on adjacent theaters are being assessed. Key indicators and warnings remain active for this area of operations.</p>
+    ${kwMatches.length?`<h3>🔍 KEYWORD FLAGS</h3><p>${kwMatches.map(m=>`<span class="kw-tag" style="font-size:10px;margin-right:6px">${m.kw} · ${m.priority}</span>`).join('')}</p>`:''}
+    <h3>SOURCE ASSESSMENT</h3>
+    <div class="source-bar">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="color:var(--amber);font-size:11px;font-family:Orbitron,monospace">${item.src}</span>
+        <span style="color:${confCol};font-size:10px;font-family:Orbitron,monospace;border:1px solid ${confCol}44;padding:1px 6px;border-radius:2px">CONF: ${confLevel}</span>
+      </div>
+      <p style="margin-bottom:8px;font-size:11px;color:#94a3b8">${srcCtx}</p>
+      <p style="font-size:10px;color:#4a5568">Cross-referenced with ${item.src==='REUTERS'||item.src==='AP'?'Bloomberg, WSJ, BBC':'Reuters, AP, Bloomberg'} and OSINT community monitoring.</p>
+    </div>
+    ${item.url?`<a class="article-ext-link" href="${item.url}" target="_blank" rel="noopener noreferrer">↗ READ FULL ARTICLE AT ${item.src}</a>`:''}
+  `;
+  document.getElementById('article-footer-src').textContent=`SOURCE: ${item.src} · ${item.url||'INTERNAL'}`;
+  document.getElementById('article-modal').classList.add('open');
+}
+function closeArticle(){document.getElementById('article-modal').classList.remove('open');}
+document.getElementById('article-modal').addEventListener('click',e=>{if(e.target===document.getElementById('article-modal'))closeArticle();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeArticle();});
+
+// ═══════════════════════════════════════
+// LEFT PANEL
+// ═══════════════════════════════════════
+let activeLeftTab='events';
+function setLeftTab(tab){
+  activeLeftTab=tab;
+  document.querySelectorAll('.ltab').forEach((el,i)=>{
+    const tabs=['events','osint','sources','collab','legend'];
+    el.classList.toggle('active',tabs[i]===tab);
+    el.style.color=tabs[i]===tab?'var(--amber)':'var(--text)';
+  });
+  buildLeftContent();
+}
+let selectedEvent=null;
+function buildLeftContent(){
+  const el=document.getElementById('left-content');
+  if(activeLeftTab==='events') el.innerHTML=buildEventsHTML();
+  else if(activeLeftTab==='osint') el.innerHTML=buildOsintHTML();
+  else if(activeLeftTab==='sources') el.innerHTML=buildSourcesHTML();
+  else if(activeLeftTab==='collab') el.innerHTML=buildCollabHTML();
+  else if(activeLeftTab==='legend') el.innerHTML=buildLegendHTML();
+}
+function buildEventsHTML(){
+  const order={CRITICAL:0,HIGH:1,MEDIUM:2,LOW:3};
+  const evs=(activeFilter==='ALL'||activeFilter==='KW'?EVENTS:EVENTS.filter(e=>e.type===activeFilter)).slice().sort((a,b)=>(order[a.sev]||3)-(order[b.sev]||3));
+  document.getElementById('s-act').textContent=evs.length;
+  return evs.map(ev=>{
+    const col=TC[ev.type]||'#fff';const sd=EVENT_SENTIMENT[ev.id];
+    const sbar=sd?`<div style="display:flex;gap:0;height:3px;border-radius:2px;overflow:hidden;margin-top:3px"><div style="width:${sd.pos}%;background:#22c55e"></div><div style="width:${sd.neu}%;background:#4a5568"></div><div style="width:${sd.neg}%;background:#ef4444"></div></div>`:'';
+    return`<div class="event-item${selectedEvent&&selectedEvent.id===ev.id?' active':''}" id="ev-${ev.id}" onclick="selectEv(${ev.id})">
+      <div class="etitle">${ev.title}</div>
+      <div class="event-meta"><span class="etag ${ev.type.toLowerCase()}">${ev.type}</span><span class="etag">${ev.sev}</span></div>${sbar}</div>`;
+  }).join('');
+}
+function buildOsintHTML(){
+  const kp=OSINT_KEYWORDS.map(k=>{
+    const cnt=kwHits.filter(h=>h.kw===k.kw).length;
+    const col=k.priority==='CRITICAL'?'#ef4444':k.priority==='HIGH'?'#f59e0b':k.priority==='MEDIUM'?'#3b82f6':'#22c55e';
+    return`<div class="kw-item"><span class="kw-label">${k.kw}</span>
+      <span style="display:flex;gap:4px;align-items:center">
+        <span class="kw-badge" style="color:${col};border:1px solid ${col}44;background:${col}11">${cnt}</span>
+        <span class="etag ${k.cat.toLowerCase()}">${k.cat}</span>
+        <span onclick="event.stopPropagation();removeKeyword('${k.kw}')" style="color:#374151;cursor:pointer;font-size:12px;padding:0 2px">×</span>
+      </span></div>`;
+  }).join('');
+  const sp=Object.entries(SENTIMENT_DATA).map(([topic,d])=>{
+    const col=d.neg>60?'#ef4444':d.pos>50?'#22c55e':'#f59e0b';
+    const tc=d.trend.startsWith('↑NEG')?'#ef4444':d.trend.startsWith('↑POS')?'#22c55e':'#f59e0b';
+    return`<div style="margin-bottom:6px;padding:5px 7px;border:1px solid ${col}33;border-radius:3px;background:${col}08">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px">${topic}</span><span style="color:${tc};font-size:10px;font-family:Orbitron,monospace">${d.trend}</span></div>
+      <div style="display:flex;height:5px;border-radius:3px;overflow:hidden;margin-bottom:2px"><div style="width:${d.pos}%;background:#22c55e"></div><div style="width:${d.neu}%;background:#6b7280"></div><div style="width:${d.neg}%;background:#ef4444"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px"><span style="color:#22c55e">POS ${d.pos}%</span><span style="color:#6b7280">NEU ${d.neu}%</span><span style="color:#ef4444">NEG ${d.neg}%</span></div>
+    </div>`;
+  }).join('');
+  const ap=ALERTS.slice(0,8).map(a=>`<div class="alert-item ${a.level}">
+    <span class="alert-dismiss" onclick="dismissAlert(${a.id})">×</span>
+    <div class="alert-time">${a.time}${a.auto?' · AUTO':' · MANUAL'}</div>
+    <div class="alert-text">${a.text}</div>
+  </div>`).join('');
+  return`<div class="panel-title">🔍 KEYWORD TRACKING</div>
+    <div class="kw-add"><input id="kw-input" placeholder="Add keyword…" onkeydown="if(event.key==='Enter'){addKeyword(this.value);this.value='';}">
+    <button onclick="addKeyword(document.getElementById('kw-input').value);document.getElementById('kw-input').value=''">ADD</button></div>
+    ${kp}
+    <div class="panel-title">💬 SENTIMENT</div>${sp}
+    <div class="panel-title">🔔 ALERTS (${ALERTS.length})</div>
+    <div style="display:flex;gap:4px;margin-bottom:6px">
+      <button onclick="addAlert('high','Manual flag triggered.',false)" style="flex:1;background:#0a1628;border:1px solid #1a3060;color:#94a3b8;font-family:Share Tech Mono,monospace;font-size:10px;padding:4px;border-radius:3px;cursor:pointer">+ FLAG</button>
+      <button onclick="ALERTS=[];updateAlertBadge();buildLeftContent()" style="flex:1;background:#0a1628;border:1px solid #1a3060;color:#94a3b8;font-family:Share Tech Mono,monospace;font-size:10px;padding:4px;border-radius:3px;cursor:pointer">CLEAR ALL</button>
+    </div>${ap}`;
+}
+function buildSourcesHTML(){
+  const cats=[...new Set(DATA_SOURCES.map(s=>s.cat))];
+  return cats.map(cat=>`<div class="panel-title">◈ ${cat}</div>`+
+    DATA_SOURCES.filter(s=>s.cat===cat).map(s=>{
+      const sc2=s.status==='live'?'#22c55e':s.status==='error'?'#ef4444':'#f59e0b';
+      const scls=s.status==='live'?'src-live':s.status==='error'?'src-error':'src-static';
+      return`<div class="src-item"><div class="src-dot" style="background:${sc2};box-shadow:0 0 5px ${sc2}"></div>
+        <div class="src-name">${s.name}<div style="font-size:9px;color:#4a5568">${s.url} · ${s.type}</div></div>
+        ${s.items?`<div style="font-size:10px;font-family:Orbitron,monospace;color:#6b7280">${s.items}</div>`:''}
+        <span class="src-status ${scls}">${s.status.toUpperCase()}</span></div>`;
+    }).join('')
+  ).join('');
+}
+function buildCollabHTML(){
+  return`<div class="panel-title">◈ ACTIVE ANALYSTS</div>`+
+    COLLAB_USERS.map(u=>`
+      <div class="collab-item">
+        <div class="collab-avatar" style="background:${u.color}22;color:${u.color};border:1px solid ${u.color}44">${u.name.split('-')[1]}</div>
+        <div style="flex:1"><div class="collab-name">${u.name}</div><div class="collab-role">${u.role}</div></div>
+        <div class="collab-status" style="background:${u.online?'#22c55e':'#374151'};box-shadow:${u.online?'0 0 5px #22c55e':'none'}"></div>
+      </div>
+      <div class="collab-msg">${u.msg}</div>`).join('')+
+    `<div class="panel-title">◈ SECURE MSG</div>
+    <div style="display:flex;gap:5px;margin-top:4px">
+      <input id="collab-input" placeholder="TLP:AMBER — analysts only…" style="flex:1;background:#030a12;border:1px solid var(--border);color:var(--bright);font-family:Share Tech Mono,monospace;font-size:11px;padding:4px 8px;border-radius:3px;outline:none" onkeydown="if(event.key==='Enter'){sendCollabMsg();}">
+      <button onclick="sendCollabMsg()" style="background:#1a1200;border:1px solid var(--amber);color:var(--amber);font-family:Share Tech Mono,monospace;font-size:10px;padding:4px 9px;border-radius:3px;cursor:pointer">SEND</button>
+    </div>
+    <div style="font-size:9px;color:#374151;margin-top:4px;letter-spacing:1px">◈ ENCRYPTED · TLP:AMBER · SCI ELIGIBLE</div>`;
+}
+function sendCollabMsg(){const i=document.getElementById('collab-input');if(!i||!i.value.trim())return;addAlert('medium','COLLAB MSG: '+i.value.trim(),false);i.value='';}
+function buildLegendHTML(){
+  const fredPanel=buildFREDPanel?buildFREDPanel():'';
+  const apiRows=LAYER_CATS.flatMap(cat=>cat.layers.filter(l=>l.api).map(l=>{
+    const st=layerApiStatus[l.key]||'sim';
+    const colMap={live:'#22c55e',sim:'#f59e0b',err:'#ef4444',fetch:'#3b82f6'};
+    const col=colMap[st]||'#94a3b8';
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #0a1628">
+      <span style="color:#94a3b8;font-size:10px">${l.api}</span>
+      <span style="font-size:9px;padding:1px 5px;border-radius:2px;border:1px solid ${col}44;background:${col}11;color:${col}">${st.toUpperCase()}</span>
+    </div>`;
+  })).join('');
+  return`<div class="panel-title">◈ EVENT TYPES</div>`+
+    [['MIL','#ef4444','MILITARY / KINETIC'],['POL','#3b82f6','POLITICAL / DIPLOMATIC'],['ECO','#22c55e','ECONOMIC / FINANCIAL'],['SIG','#8b5cf6','SIGNALS / INTELLIGENCE'],['HUM','#f97316','HUMANITARIAN / CIVIL'],['CYB','#06b6d4','CYBER / ELECTRONIC']].map(([,col,lbl])=>`<div class="legend-row"><div class="legend-dot" style="background:${col};box-shadow:0 0 5px ${col}"></div>${lbl}</div>`).join('')+
+    `<div class="panel-title">◈ ARC LINK TYPES</div>`+
+    [['#ef4444','SAME ACTOR'],['#f59e0b','SAME OPERATION'],['#22c55e','GEO SPILLOVER'],['#8b5cf6','SUPPLY / FINANCE'],['#06b6d4','CYBER ATTRIBUTION']].map(([col,lbl])=>`<div class="legend-row"><div style="width:20px;height:2px;background:${col};flex-shrink:0"></div>${lbl}</div>`).join('')+
+    `<div class="panel-title">⚓ SHIPPING / AIS VESSELS</div>
+    <div class="legend-row"><div style="width:20px;height:3px;background:#38bdf8;flex-shrink:0"></div>MAJOR COMMERCIAL LANE</div>
+    <div class="legend-row"><div style="width:20px;height:3px;background:#f59e0b;flex-shrink:0"></div>ENERGY / TANKER LANE</div>
+    <div class="legend-row"><div style="width:20px;height:3px;background:#a855f7;flex-shrink:0"></div>STRATEGIC LANE</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#f59e0b"></div>AIS — TANKER (TYPE 80-89)</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#3b82f6"></div>AIS — CARGO (TYPE 70-79)</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#22c55e"></div>AIS — PASSENGER</div>
+    <div class="panel-title">🔥 LIVE DATA OVERLAYS</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#f97316"></div>ACLED — CONFLICT EVENT (✕)</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#ef4444"></div>NASA FIRMS — THERMAL ANOMALY</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#8b5cf6"></div>GDELT — NEGATIVE TONE EVENT</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#06b6d4"></div>GDELT — NEUTRAL/POSITIVE</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#ef4444"></div>OTX — CYBER THREAT ACTOR (⚡)</div>
+    <div class="legend-row"><div style="width:14px;height:10px;border:1px dashed #ef4444;flex-shrink:0;opacity:0.6"></div>NOTAM R-ZONE (RESTRICTED)</div>
+    <div class="legend-row"><div style="width:14px;height:10px;border:1px dashed #22c55e;flex-shrink:0;opacity:0.6"></div>NOTAM MOA (MIL OPS AREA)</div>
+    <div class="panel-title">✈ ADS-B / MIL FLIGHTS</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#06b6d4"></div>COMMERCIAL FLIGHT</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#f59e0b"></div>★ MILITARY FLIGHT</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#ef4444"></div>⚠ EMERGENCY (7700/7600)</div>
+    <div class="panel-title">🌤 NWS WEATHER STATIONS</div>
+    <div class="legend-row"><div class="legend-dot" style="background:#7dd3fc"></div>TEMP °F  ·  WIND kts (hover)</div>
+    <div class="panel-title">🏛 US MILITARY BASES</div>
+    <div class="legend-row"><div style="width:10px;height:10px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:#22c55e;flex-shrink:0"></div><span style="color:#22c55e">▪ US ARMY</span></div>
+    <div class="legend-row"><div style="width:10px;height:10px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:#3b82f6;flex-shrink:0"></div><span style="color:#3b82f6">▲ US AIR FORCE</span></div>
+    <div class="legend-row"><div style="width:10px;height:10px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:#06b6d4;flex-shrink:0"></div><span style="color:#06b6d4">● US NAVY</span></div>
+    <div class="legend-row"><div style="width:10px;height:10px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:#f97316;flex-shrink:0"></div><span style="color:#f97316">◆ US MARINE CORPS</span></div>
+    <div class="legend-row"><div style="width:10px;height:10px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:#8b5cf6;flex-shrink:0"></div><span style="color:#8b5cf6">★ SOCOM / SPEC OPS</span></div>
+    <div class="legend-row"><div style="width:10px;height:10px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:#a78bfa;flex-shrink:0"></div><span style="color:#a78bfa">✦ US SPACE FORCE</span></div>
+    <div style="font-size:9px;color:#374151;margin-top:4px;line-height:1.5">Pentagon = base · Pulse ring = ELEVATED/SURGE · Gray = CLOSED · Labels at zoom ≥4</div>
+    <div class="panel-title">📈 FRED MACRO INDICATORS</div>
+    ${fredPanel}
+    <div class="panel-title">⚡ API FEED STATUS</div>
+    ${apiRows}
+    <div style="font-size:9px;color:#374151;margin-top:6px;line-height:1.6">LIVE=real data · SIM=fallback · ERR=unreachable · FETCH=loading</div>`;
+}
+function selectEv(id){selectedEvent=EVENTS.find(e=>e.id===id)||null;buildLeftContent();}
+
+// ═══════════════════════════════════════
+// MAP — TILE ENGINE
+// ═══════════════════════════════════════
+const TILE_SIZE=256;
+const TILE_PROVIDERS=[
+  (z,x,y)=>`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`,
+  (z,x,y)=>`https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`,
+];
+const LABEL_PROVIDERS=[
+  (z,x,y)=>`https://a.basemaps.cartocdn.com/light_only_labels/${z}/${x}/${y}.png`,
+  (z,x,y)=>`https://b.basemaps.cartocdn.com/light_only_labels/${z}/${x}/${y}.png`,
+];
+const tileCache=new Map();
+const labelCache=new Map();
+let tileProvider=0;
+let zoom=2,panX=0,panY=0;
+let isDragging=false,lastMX=0,lastMY=0;
+let activeFilter='ALL';
+let hoveredEvent=null,hoveredLane=null,hoveredUnit=null;
+
+const tileC=document.getElementById('tile-canvas');
+const ovC=document.getElementById('overlay-canvas');
+const hitC=document.getElementById('hit-canvas');
+const tctx=tileC.getContext('2d');
+const octx=ovC.getContext('2d');
+const mapWrap=document.getElementById('map-wrap');
+
+function ll2world(lat,lon){const n=1<<zoom;const x=(lon+180)/360*n*TILE_SIZE;const lr=lat*Math.PI/180;const y=(1-Math.log(Math.tan(lr)+1/Math.cos(lr))/Math.PI)/2*n*TILE_SIZE;return{x,y};}
+function world2ll(wx,wy){const n=1<<zoom;const lon=wx/(n*TILE_SIZE)*360-180;const yn=wy/(n*TILE_SIZE);const lat=Math.atan(Math.sinh(Math.PI*(1-2*yn)))*180/Math.PI;return{lat,lon};}
+function ll2s(lat,lon){const w=ll2world(lat,lon);return{x:w.x-panX,y:w.y-panY};}
+function s2ll(sx,sy){return world2ll(sx+panX,sy+panY);}
+
+function loadTile(z,x,y,cache,providers,onload){
+  const n=1<<z;x=((x%n)+n)%n;const key=`${z}/${x}/${y}`;
+  if(cache.has(key))return cache.get(key);
+  const e={img:null,loaded:false,failed:false};cache.set(key,e);
+  const img=new Image();img.crossOrigin='anonymous';
+  img.onload=()=>{e.img=img;e.loaded=true;onload&&onload();};
+  img.onerror=()=>{e.failed=true;};
+  img.src=providers[Math.min(tileProvider,providers.length-1)](z,x,y);
+  return e;
+}
+
+function renderTiles(){
+  const W=tileC.width,H=tileC.height;
+  tctx.clearRect(0,0,W,H);tctx.fillStyle='#010814';tctx.fillRect(0,0,W,H);
+  const n=1<<zoom;
+  const minTX=Math.floor(panX/TILE_SIZE),minTY=Math.max(0,Math.floor(panY/TILE_SIZE));
+  const maxTX=Math.ceil((panX+W)/TILE_SIZE),maxTY=Math.min(n-1,Math.ceil((panY+H)/TILE_SIZE));
+  for(let ty=minTY;ty<=maxTY;ty++)for(let tx=minTX;tx<=maxTX;tx++){
+    const ntx=((tx%n)+n)%n;const e=loadTile(zoom,ntx,ty,tileCache,TILE_PROVIDERS,()=>{renderTiles();});
+    const sx=tx*TILE_SIZE-panX,sy=ty*TILE_SIZE-panY;
+    if(e.loaded&&e.img)tctx.drawImage(e.img,sx,sy,TILE_SIZE,TILE_SIZE);
+    else if(!e.failed){tctx.fillStyle='#0a1525';tctx.fillRect(sx,sy,TILE_SIZE-1,TILE_SIZE-1);}
+  }
+  for(let ty=minTY;ty<=maxTY;ty++)for(let tx=minTX;tx<=maxTX;tx++){
+    const ntx=((tx%n)+n)%n;const e=loadTile(zoom,ntx,ty,labelCache,LABEL_PROVIDERS,()=>{renderTiles();});
+    const sx=tx*TILE_SIZE-panX,sy=ty*TILE_SIZE-panY;
+    if(e.loaded&&e.img){tctx.globalAlpha=0.85;tctx.drawImage(e.img,sx,sy,TILE_SIZE,TILE_SIZE);tctx.globalAlpha=1;}
+  }
+  document.getElementById('zoom-level').textContent='Z'+zoom;
+}
+
+// ═══════════════════════════════════════
+// TERMINATOR — fixed to lat/lon, not screen
+// ═══════════════════════════════════════
+// The key fix: compute night mask in geographic space, then project to screen.
+// This ensures the shadow stays geographically anchored regardless of pan/zoom.
+function getSolarParams(){
+  const now=new Date();
+  const d2r=Math.PI/180;
+  const dayOfYear=Math.floor((now-(new Date(now.getFullYear(),0,0)))/86400000);
+  // Solar declination
+  const decl=-23.45*Math.cos(d2r*360/365*(dayOfYear+10));
+  // Sub-solar longitude (where sun is directly overhead)
+  const utcHours=now.getUTCHours()+now.getUTCMinutes()/60+now.getUTCSeconds()/3600;
+  const subLon=(utcHours-12)*(-15); // sun moves west
+  return{decl,subLon};
+}
+
+function isNightAt(lat,lon,decl,subLon){
+  const d2r=Math.PI/180;
+  const sinD=Math.sin(decl*d2r);
+  const cosD=Math.cos(decl*d2r);
+  const dLon=(lon-subLon)*d2r;
+  return sinD*Math.sin(lat*d2r)+cosD*Math.cos(lat*d2r)*Math.cos(dLon)<0;
+}
+
+// Pre-bake a night mask texture at a fixed geographic resolution
+// We use a separate offscreen canvas, repainted once per second
+let nightMaskCanvas=null;
+let nightMaskTime=-1;
+const NIGHT_RES=2; // sample every N pixels in screen space — lower = sharper but slower
+
+function buildNightMask(W,H){
+  const now=Date.now();
+  if(nightMaskCanvas&&nightMaskCanvas.width===W&&nightMaskCanvas.height===H&&now-nightMaskTime<1000){
+    return nightMaskCanvas;
+  }
+  nightMaskTime=now;
+  if(!nightMaskCanvas||nightMaskCanvas.width!==W||nightMaskCanvas.height!==H){
+    nightMaskCanvas=document.createElement('canvas');
+    nightMaskCanvas.width=W;
+    nightMaskCanvas.height=H;
+  }
+  const mctx=nightMaskCanvas.getContext('2d');
+  const{decl,subLon}=getSolarParams();
+  const imgData=mctx.createImageData(W,H);
+  const data=imgData.data;
+  // Sample at NIGHT_RES resolution, fill blocks
+  for(let sy=0;sy<H;sy+=NIGHT_RES){
+    for(let sx=0;sx<W;sx+=NIGHT_RES){
+      const ll=world2ll(sx+panX,sy+panY);
+      if(ll.lat<-85||ll.lat>85){continue;}
+      const night=isNightAt(ll.lat,ll.lon,decl,subLon);
+      if(night){
+        const alpha=157; // ~62% opacity
+        for(let dy=0;dy<NIGHT_RES&&sy+dy<H;dy++){
+          for(let dx=0;dx<NIGHT_RES&&sx+dx<W;dx++){
+            const idx=((sy+dy)*W+(sx+dx))*4;
+            data[idx]=0;data[idx+1]=4;data[idx+2]=20;data[idx+3]=alpha;
+          }
+        }
+      }
+    }
+  }
+  mctx.putImageData(imgData,0,0);
+  return nightMaskCanvas;
+}
+
+function drawTerminator(W,H){
+  // Build night mask locked to current geo projection
+  const mask=buildNightMask(W,H);
+  octx.save();
+  octx.drawImage(mask,0,0);
+
+  // Draw terminator line by tracing lat where solar angle = 0
+  const{decl,subLon}=getSolarParams();
+  const d2r=Math.PI/180;
+  octx.strokeStyle='rgba(255,210,100,0.5)';
+  octx.lineWidth=1.5;
+  octx.setLineDash([5,7]);
+  octx.beginPath();
+  let prev=null;
+  for(let lon=-180;lon<=180;lon+=0.8){
+    const tanLat=-Math.cos((lon-subLon)*d2r)/Math.tan(decl*d2r);
+    const lat=Math.atan(tanLat)/d2r;
+    if(Math.abs(lat)>85){prev=null;continue;}
+    const s=ll2s(lat,lon);
+    // Avoid wrap-around lines
+    if(!prev||Math.abs(s.x-(prev.x))>W*0.3){octx.moveTo(s.x,s.y);}
+    else{octx.lineTo(s.x,s.y);}
+    prev=s;
+  }
+  octx.stroke();
+  octx.setLineDash([]);
+  octx.restore();
+}
+
+// ═══════════════════════════════════════
+// OVERLAY
+// ═══════════════════════════════════════
+function drawOverlay(){
+  const W=ovC.width,H=ovC.height;
+  octx.clearRect(0,0,W,H);
+  octx.globalCompositeOperation='source-over';
+  octx.globalAlpha=1;
+
+  if(LAYERS.term)drawTerminator(W,H);
+
+  // Heatmap — screen blend for glow
+  if(LAYERS.heat)drawHeatmap();
+  octx.globalCompositeOperation='source-over';
+  octx.globalAlpha=1;
+
+  if(LAYERS.shipping)drawShippingLanes();
+  if(LAYERS.ais)drawAISLayer();
+  if(LAYERS.arcs)drawArcs();
+  if(LAYERS.gdelt)drawGDELTLayer();
+  if(LAYERS.acled)drawACLEDLayer();
+  if(LAYERS.firms)drawFIRMSLayer();
+  if(LAYERS.otx)drawOTXLayer();
+  if(LAYERS.cisa)drawCISALayer();
+  if(LAYERS.reliefweb)drawReliefWebLayer();
+  if(LAYERS.weather)drawWeatherLayer();
+  if(LAYERS.fred)drawFREDLayer();
+  if(LAYERS.notam)drawNOTAMLayer();
+  if(LAYERS.bases)drawUSBases();
+  if(LAYERS.mil)drawMilDisp();
+  if(LAYERS.flights)drawFlights();
+  if(LAYERS.sent)drawSentimentOverlay();
+  if(LAYERS.kw)drawKwLayer();
+  if(LAYERS.events!==false)drawEventMarkers();
+
+  octx.globalCompositeOperation='source-over';
+  octx.globalAlpha=1;
+}
+
+function drawHeatmap(){
+  // Use screen blending for additive glow, then reset
+  octx.globalCompositeOperation='screen';
+  for(const ev of EVENTS){
+    const s=ll2s(ev.lat,ev.lon);
+    const w=(SEV_HEAT[ev.sev]||0.2)*0.55;
+    const[r,g,b]=TYPE_HEAT_RGB[ev.type]||[200,200,200];
+    const R=32+w*60;
+    const a=Math.min(0.78,w*0.95);
+    const grd=octx.createRadialGradient(s.x,s.y,0,s.x,s.y,R);
+    grd.addColorStop(0,`rgba(${r},${g},${b},${a})`);
+    grd.addColorStop(0.5,`rgba(${r},${g},${b},${a*0.4})`);
+    grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
+    octx.beginPath();octx.arc(s.x,s.y,R,0,Math.PI*2);
+    octx.fillStyle=grd;octx.fill();
+  }
+  octx.globalCompositeOperation='source-over';
+  octx.globalAlpha=1;
+}
+
+function drawSentimentOverlay(){
+  for(const ev of EVENTS){
+    const sd=EVENT_SENTIMENT[ev.id];if(!sd)continue;
+    const s=ll2s(ev.lat,ev.lon);const sz=SS[ev.sev]||4;
+    const total=sd.pos+sd.neg+sd.neu;
+    const posA=(sd.pos/total)*Math.PI*2,negA=(sd.neg/total)*Math.PI*2;
+    const arcR=sz+5;
+    octx.lineWidth=2.5;
+    octx.strokeStyle='#22c55e';octx.beginPath();octx.arc(s.x,s.y,arcR,-Math.PI/2,-Math.PI/2+posA);octx.stroke();
+    octx.strokeStyle='#ef4444';octx.beginPath();octx.arc(s.x,s.y,arcR,-Math.PI/2+posA,-Math.PI/2+posA+negA);octx.stroke();
+    octx.strokeStyle='#374151';octx.beginPath();octx.arc(s.x,s.y,arcR,-Math.PI/2+posA+negA,-Math.PI/2+Math.PI*2);octx.stroke();
+  }
+}
+
+function drawKwLayer(){
+  for(const ev of EVENTS){
+    const m=matchKW(ev.title+' '+ev.body+' '+ev.loc);if(!m.length)continue;
+    const s=ll2s(ev.lat,ev.lon);
+    octx.strokeStyle='#06b6d4';octx.lineWidth=2.5;octx.beginPath();octx.arc(s.x,s.y,(SS[ev.sev]||4)*3.5,0,Math.PI*2);octx.stroke();
+    octx.font='bold 10px Share Tech Mono';octx.fillStyle='#06b6d4';octx.textAlign='center';
+    octx.fillText('🔍'+m[0].kw,s.x,s.y-(SS[ev.sev]||4)*4-4);
+  }
+  octx.textAlign='left';
+}
+
+function gcPts(la1,lo1,la2,lo2,n=50){
+  const r=Math.PI/180,φ1=la1*r,λ1=lo1*r,φ2=la2*r,λ2=lo2*r;
+  const v1=[Math.cos(φ1)*Math.cos(λ1),Math.cos(φ1)*Math.sin(λ1),Math.sin(φ1)];
+  const v2=[Math.cos(φ2)*Math.cos(λ2),Math.cos(φ2)*Math.sin(λ2),Math.sin(φ2)];
+  const dot=Math.min(1,Math.max(-1,v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2]));
+  const omega=Math.acos(dot);if(omega<0.001)return[{lat:la1,lon:lo1},{lat:la2,lon:lo2}];
+  const sinO=Math.sin(omega),pts=[];
+  for(let i=0;i<=n;i++){const s=i/n,s1=Math.sin((1-s)*omega)/sinO,s2=Math.sin(s*omega)/sinO;const x=s1*v1[0]+s2*v2[0],y_=s1*v1[1]+s2*v2[1],z=s1*v1[2]+s2*v2[2];pts.push({lat:Math.asin(Math.max(-1,Math.min(1,z)))/r,lon:Math.atan2(y_,x)/r});}
+  return pts;
+}
+function drawArcs(){
+  const t=Date.now()/1000;const evMap=new Map(EVENTS.map(e=>[e.id,e]));
+  const aIds=new Set();if(selectedEvent)aIds.add(selectedEvent.id);if(hoveredEvent)aIds.add(hoveredEvent.id);
+  const hasActive=aIds.size>0;
+  for(const lk of EVENT_LINKS){
+    const A=evMap.get(lk.from),B=evMap.get(lk.to);if(!A||!B)continue;
+    const hot=hasActive&&(aIds.has(lk.from)||aIds.has(lk.to));
+    if(hasActive&&!hot)continue;
+    const col=LINK_COLORS[lk.type]||'#fff';const alpha=hot?0.85:0.3;const lw=hot?1.8:0.9;
+    const pts=gcPts(A.lat,A.lon,B.lat,B.lon);const sp=pts.map(p=>ll2s(p.lat,p.lon));const W=ovC.width;
+    const segs=[];let seg=[];for(let i=0;i<sp.length;i++){if(seg.length>0&&Math.abs(sp[i].x-seg[seg.length-1].x)>W*0.4)segs.push(seg),seg=[];seg.push(sp[i]);}if(seg.length)segs.push(seg);
+    octx.save();octx.globalAlpha=alpha;octx.strokeStyle=col;octx.lineWidth=lw;octx.lineCap='round';
+    for(const s of segs){if(s.length<2)continue;octx.beginPath();octx.moveTo(s[0].x,s[0].y);for(let i=1;i<s.length;i++)octx.lineTo(s[i].x,s[i].y);octx.stroke();}
+    if(lk.directed&&pts.length>4){const hl=Math.max(3,Math.floor(pts.length*0.10));const rp=((t*0.22)%1+1)%1;const hs=Math.floor(rp*(pts.length-hl));const hp=pts.slice(hs,hs+hl).map(p=>ll2s(p.lat,p.lon));
+      if(hp.length>1&&hp.every(p=>Math.abs(p.x-hp[0].x)<W*0.4)){octx.globalAlpha=1;octx.lineWidth=lw*2.2;octx.strokeStyle='rgba(255,255,255,0.9)';octx.beginPath();octx.moveTo(hp[0].x,hp[0].y);for(let i=1;i<hp.length;i++)octx.lineTo(hp[i].x,hp[i].y);octx.stroke();
+        const tip=hp[hp.length-1],prev=hp[Math.max(0,hp.length-3)];const ang=Math.atan2(tip.y-prev.y,tip.x-prev.x),as=7;octx.fillStyle='rgba(255,255,255,0.9)';octx.beginPath();octx.moveTo(tip.x+Math.cos(ang)*as,tip.y+Math.sin(ang)*as);octx.lineTo(tip.x+Math.cos(ang+2.4)*as*0.5,tip.y+Math.sin(ang+2.4)*as*0.5);octx.lineTo(tip.x+Math.cos(ang-2.4)*as*0.5,tip.y+Math.sin(ang-2.4)*as*0.5);octx.closePath();octx.fill();
+      }
+    }
+    if(hot&&lk.label){const mid=sp[Math.floor(sp.length/2)];octx.globalAlpha=0.9;octx.font='9px Share Tech Mono';const lw2=octx.measureText(lk.label).width;octx.fillStyle='rgba(2,8,16,0.85)';octx.fillRect(mid.x-lw2/2-3,mid.y-9,lw2+6,12);octx.fillStyle=col;octx.textAlign='center';octx.fillText(lk.label,mid.x,mid.y);octx.textAlign='left';}
+    octx.restore();
+  }
+}
+
+function drawEventMarkers(){
+  const t=Date.now()/1000;
+  const evs=activeFilter==='ALL'||activeFilter==='KW'?EVENTS:EVENTS.filter(e=>e.type===activeFilter);
+  for(const ev of evs){
+    const s=ll2s(ev.lat,ev.lon);const col=TC[ev.type]||'#fff';const sz=SS[ev.sev]||4;
+    const pulse=Math.sin(t*2.2+ev.id)*0.4+0.6;const isSel=selectedEvent&&selectedEvent.id===ev.id;
+    octx.beginPath();octx.arc(s.x,s.y,sz*2.8*pulse,0,Math.PI*2);octx.strokeStyle=col+'44';octx.lineWidth=1;octx.stroke();
+    if(isSel){octx.beginPath();octx.arc(s.x,s.y,sz*4,0,Math.PI*2);octx.strokeStyle=col+'cc';octx.lineWidth=1.5;octx.stroke();}
+    const grd=octx.createRadialGradient(s.x,s.y,0,s.x,s.y,sz*3);grd.addColorStop(0,col+'44');grd.addColorStop(1,col+'00');
+    octx.beginPath();octx.arc(s.x,s.y,sz*3,0,Math.PI*2);octx.fillStyle=grd;octx.fill();
+    octx.beginPath();octx.arc(s.x,s.y,sz,0,Math.PI*2);octx.fillStyle=col;octx.fill();
+    octx.strokeStyle='rgba(0,0,0,0.7)';octx.lineWidth=1;octx.stroke();
+    if(ev.sev==='CRITICAL'||isSel){const lbl=ev.title.length>26?ev.title.slice(0,24)+'…':ev.title;octx.font='bold 10px Share Tech Mono';const lw=octx.measureText(lbl).width;octx.fillStyle='rgba(2,8,16,0.85)';octx.fillRect(s.x+sz+3,s.y-9,lw+7,13);octx.fillStyle=col;octx.textAlign='left';octx.fillText(lbl,s.x+sz+6,s.y+1);}
+  }
+  octx.textAlign='left';
+}
+
+// ═══════════════════════════════════════
+// SHIPPING LANES
+// ═══════════════════════════════════════
+const SHIPPING_LANES=[
+  {id:'SZ2',name:'Red Sea — Bab-el-Mandeb',type:'ENERGY',teu:'6.2 Mb/d oil',vol:'Houthi interdiction zone',threat:'CRITICAL',chokepoint:'Bab-el-Mandeb',pts:[[29,33],[25,35],[22,38],[17,41],[13,43],[11,45],[12,50]]},
+  {id:'SZ1',name:'Europe–Asia (Suez Route)',type:'COMMERCIAL',teu:'22M TEU/yr',vol:'12% global trade',threat:'HIGH',chokepoint:'Suez Canal',pts:[[51,-1],[43,5],[37,10],[32,22],[30,33],[27,34],[20,38],[12,50],[1,48],[-5,40],[-20,48],[-34,26]]},
+  {id:'TP1',name:'North Pacific — Asia→N.America',type:'COMMERCIAL',teu:'26M TEU/yr',vol:'Largest container corridor',threat:'LOW',chokepoint:null,pts:[[35,127],[42,155],[48,-175],[44,-140],[37,-122]]},
+  {id:'TA1',name:'North Atlantic',type:'COMMERCIAL',teu:'14M TEU/yr',vol:'Europe-North America',threat:'LOW',chokepoint:null,pts:[[51,-1],[48,-20],[42,-50],[40,-74]]},
+  {id:'ML1',name:'Strait of Malacca',type:'COMMERCIAL',teu:'40% global shipping',vol:'90,000+ vessels/yr',threat:'MEDIUM',chokepoint:'Strait of Malacca',pts:[[22,114],[10,108],[5,104],[1,103],[3,106],[8,112]]},
+  {id:'ML2',name:'South China Sea',type:'COMMERCIAL',teu:'$3.4T trade/yr',vol:'PRC territorial claims active',threat:'HIGH',chokepoint:'South China Sea',pts:[[22,114],[18,114],[12,110],[5,104],[1,103]]},
+  {id:'HZ1',name:'Strait of Hormuz — Oil',type:'ENERGY',teu:'21 Mb/d (20% global oil)',vol:'Critical energy chokepoint',threat:'HIGH',chokepoint:'Strait of Hormuz',pts:[[24,58],[26,57],[26,55],[24,56],[22,60]]},
+  {id:'TW1',name:'Taiwan Strait',type:'COMMERCIAL',teu:'50% global container transit',vol:'PLA interdiction risk elevated',threat:'HIGH',chokepoint:'Taiwan Strait',pts:[[26,122],[24,121],[22,120],[21,120]]},
+  {id:'PC1',name:'Panama Canal',type:'COMMERCIAL',teu:'14,000 vessels/yr',vol:'Drought-reduced capacity',threat:'MEDIUM',chokepoint:'Panama Canal',pts:[[9,-80],[9,-79],[9,-77],[10,-75]]},
+  {id:'CG1',name:'Cape of Good Hope Bypass',type:'COMMERCIAL',teu:'Suez threat diversion',vol:'+14 days vs Suez',threat:'LOW',chokepoint:null,pts:[[51,-1],[38,-9],[5,-12],[-34,18],[-20,40],[10,55],[22,65]]},
+  {id:'NS1',name:'Northern Sea Route (Arctic)',type:'STRATEGIC',teu:'~35M tonnes/yr',vol:'Russian controlled — LNG',threat:'MEDIUM',chokepoint:null,pts:[[70,30],[75,55],[78,85],[77,115],[72,135],[70,140]]},
+];
+const CHOKEPOINTS={
+  'Bab-el-Mandeb':{trade:'6-10% global oil',threat:'CRITICAL — Houthi interdiction',note:'USN Task Force Prosperity Guardian deployed'},
+  'Suez Canal':{trade:'12-15% global trade',threat:'HIGH — Houthi ASM campaign',note:'Many carriers diverting via Cape of Good Hope since Dec 2023'},
+  'Strait of Hormuz':{trade:'20% global petroleum',threat:'HIGH — IRGC naval harassment',note:'US 5th Fleet present. Minelaying capability assessed'},
+  'Strait of Malacca':{trade:'40% global shipping',threat:'MEDIUM',note:'Singapore-Indonesia-Malaysia joint patrols'},
+  'South China Sea':{trade:'30% global maritime trade',threat:'HIGH — PRC territorial disputes',note:'USN FONOP operations ongoing'},
+  'Taiwan Strait':{trade:'50% container transits',threat:'HIGH — PLA exercise closures',note:'Two carrier groups surge-capable'},
+  'Panama Canal':{trade:'3-5% global trade',threat:'MEDIUM — drought capacity reduction',note:'Capacity at 24 ships/day during drought'},
+};
+
+function drawShippingLanes(){
+  const t=Date.now()/3000;const W=ovC.width;
+  for(const lane of SHIPPING_LANES){
+    const pts=lane.pts.map(([la,lo])=>ll2s(la,lo));
+    // Split into segments to handle anti-meridian wrap
+    const segs=[];let seg=[];
+    for(let i=0;i<pts.length;i++){
+      if(seg.length>0&&Math.abs(pts[i].x-seg[seg.length-1].x)>W*0.35){segs.push(seg);seg=[];}
+      seg.push(pts[i]);
+    }
+    if(seg.length)segs.push(seg);
+
+    let col,lw,dash;
+    if(lane.threat==='CRITICAL'){col='#ef4444';lw=2.5;dash=[6,4];}
+    else if(lane.threat==='HIGH'&&lane.type==='ENERGY'){col='#f97316';lw=2.0;dash=[5,4];}
+    else if(lane.threat==='HIGH'){col='#eab308';lw=1.8;dash=[5,4];}
+    else if(lane.type==='ENERGY'){col='#f59e0b';lw=2.0;dash=[];}
+    else if(lane.type==='STRATEGIC'){col='#a855f7';lw=1.5;dash=[8,5];}
+    else{col='#38bdf8';lw=1.3;dash=[];}
+
+    const isHov=hoveredLane&&hoveredLane.id===lane.id;
+    if(isHov)lw*=2;
+
+    for(const s of segs){
+      if(s.length<2)continue;
+      octx.save();
+      octx.strokeStyle=col;
+      octx.lineWidth=lw;
+      octx.globalAlpha=isHov?0.95:0.65;
+      octx.lineCap='round';octx.lineJoin='round';
+      octx.setLineDash(dash);
+      if(lane.threat==='CRITICAL'||lane.threat==='HIGH'||isHov){
+        octx.shadowColor=col;octx.shadowBlur=isHov?12:6;
+      }
+      octx.beginPath();octx.moveTo(s[0].x,s[0].y);
+      for(let i=1;i<s.length;i++)octx.lineTo(s[i].x,s[i].y);
+      octx.stroke();
+      octx.shadowBlur=0;
+      octx.restore();
+    }
+
+    // Animated flow dot
+    const allPts=segs.flat();
+    if(allPts.length>3){
+      const phase=((t*(lane.threat==='CRITICAL'?0.18:0.1))%1+1)%1;
+      const idx=Math.floor(phase*(allPts.length-1));
+      const p=allPts[Math.max(0,Math.min(allPts.length-1,idx))];
+      octx.save();octx.globalAlpha=0.9;octx.shadowColor=col;octx.shadowBlur=8;
+      octx.beginPath();octx.arc(p.x,p.y,3.5,0,Math.PI*2);
+      octx.fillStyle=col;octx.fill();
+      octx.shadowBlur=0;octx.restore();
+    }
+
+    // Chokepoint diamond
+    if(lane.chokepoint&&zoom>=3){
+      const mid=pts[Math.floor(pts.length*0.5)];
+      if(mid&&mid.x>0&&mid.x<W&&mid.y>0&&mid.y<ovC.height){
+        const dCol=lane.threat==='CRITICAL'?'#ef4444':lane.threat==='HIGH'?'#f59e0b':'#38bdf8';
+        const cs=5;
+        octx.save();octx.globalAlpha=0.9;octx.shadowColor=dCol;octx.shadowBlur=7;
+        octx.fillStyle=dCol;
+        octx.beginPath();octx.moveTo(mid.x,mid.y-cs);octx.lineTo(mid.x+cs,mid.y);octx.lineTo(mid.x,mid.y+cs);octx.lineTo(mid.x-cs,mid.y);octx.closePath();octx.fill();
+        octx.shadowBlur=0;octx.restore();
+      }
+    }
+  }
+}
+
+function shippingAt(mx,my){
+  for(const lane of SHIPPING_LANES){
+    for(let i=0;i<lane.pts.length-1;i++){
+      const a=ll2s(lane.pts[i][0],lane.pts[i][1]),b=ll2s(lane.pts[i+1][0],lane.pts[i+1][1]);
+      if(Math.abs(b.x-a.x)>ovC.width*0.35)continue;
+      const dx=b.x-a.x,dy=b.y-a.y,lsq=dx*dx+dy*dy;
+      if(lsq<1)continue;
+      const t_=Math.max(0,Math.min(1,((mx-a.x)*dx+(my-a.y)*dy)/lsq));
+      if(Math.hypot(mx-a.x-t_*dx,my-a.y-t_*dy)<10)return lane;
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════
+// MILITARY DISPOSITION (adversary / allied / deployed units)
+// ═══════════════════════════════════════
+const MIL_UNITS=[
+  {id:'A01',branch:'AIR',align:'US',name:'USAF — Kadena AB',loc:'Okinawa, Japan',lat:26.35,lon:127.77,status:'ELEVATED',assets:'F-15C/D (48), U-2S, RC-135',strength:'18th Wing',note:'INDOPACOM primary. Taiwan Strait watch.',readiness:'HIGH'},
+  {id:'A02',branch:'AIR',align:'US',name:'USAF — Al Udeid AB',loc:'Qatar',lat:25.12,lon:51.31,status:'ELEVATED',assets:'F-15E (24), B-52H (6), MQ-9 (12)',strength:'379th AEW',note:'CENTCOM air ops hub. B-52 deployment active.',readiness:'HIGH'},
+  {id:'A03',branch:'AIR',align:'US',name:'USAF — Andersen AFB',loc:'Guam',lat:13.58,lon:144.93,status:'SURGE',assets:'B-52H (6), B-2A (3), F-22A (12)',strength:'36th Wing / STRATCOM',note:'Strategic bomber hub. DCA mission active.',readiness:'HIGH'},
+  {id:'A04',branch:'AIR',align:'NATO',name:'USAF — RAF Lakenheath',loc:'Suffolk, UK',lat:52.41,lon:0.56,status:'SURGE',assets:'F-35A (48), F-15E (24)',strength:'48th FW',note:'Only US F-35 wing in Europe. Surge alert.',readiness:'HIGH'},
+  {id:'A05',branch:'AIR',align:'ADVERSARY_RU',name:'VKS — Khmeimim AB',loc:'Latakia, Syria',lat:35.40,lon:35.95,status:'DEPLOYED',assets:'Su-35S (8), S-400',strength:'Russian AF Syria',note:'Russian power projection hub.',readiness:'HIGH'},
+  {id:'A06',branch:'AIR',align:'ADVERSARY_CN',name:'PLAAF — Dachang AB',loc:'Shanghai, China',lat:31.33,lon:121.50,status:'ELEVATED',assets:'J-20 (24), J-16 (36)',strength:'Eastern Theater Air',note:'Taiwan Strait ops.',readiness:'HIGH'},
+  {id:'A07',branch:'AIR',align:'ALLIED',name:'IDF IAF — Tel Nof AB',loc:'Israel',lat:31.84,lon:34.82,status:'SURGE',assets:'F-35I Adir (36), F-15I (25)',strength:'5th/69th Sqn',note:'Active strike ops Gaza/Lebanon.',readiness:'HIGH'},
+  {id:'N01',branch:'NAVY',align:'US',name:'USS Gerald R. Ford CSG',loc:'North Atlantic',lat:48.0,lon:-20.0,status:'DEPLOYED',assets:'CVN-78, DDG×2, SSN×2',strength:'CSG-12',note:'NATO Article 5 deterrence.',readiness:'HIGH'},
+  {id:'N02',branch:'NAVY',align:'US',name:'USS Theodore Roosevelt CSG',loc:'South China Sea',lat:15.0,lon:115.0,status:'ELEVATED',assets:'CVN-71, DDG×3, SSN×2',strength:'CSG-9',note:'FONOP South China Sea.',readiness:'HIGH'},
+  {id:'N03',branch:'NAVY',align:'US',name:'USS Eisenhower CSG',loc:'Red Sea / CENTCOM',lat:16.0,lon:44.0,status:'SURGE',assets:'CVN-69, DDG×2, SSN×2',strength:'CSG-2',note:'Op Prosperity Guardian. Houthi intercept.',readiness:'HIGH'},
+  {id:'N04',branch:'NAVY',align:'ADVERSARY_CN',name:'PLAN East Sea Fleet',loc:'Ningbo, China',lat:29.88,lon:121.55,status:'SURGE',assets:'Type 055 (2), Type 052D (6)',strength:'East Sea Fleet',note:'Taiwan Strait primary battle fleet.',readiness:'HIGH'},
+  {id:'N05',branch:'NAVY',align:'ADVERSARY_RU',name:'Russian Northern Fleet',loc:'Kola Peninsula, Russia',lat:69.07,lon:33.42,status:'ELEVATED',assets:'Yasen-M SSN (3)',strength:'Northern Fleet HQ',note:'SSBN bastion. Arctic patrols elevated.',readiness:'MEDIUM'},
+  {id:'L01',branch:'LAND',align:'US',name:'US Army V Corps — Poland',loc:'Poznan, Poland',lat:52.40,lon:16.93,status:'DEPLOYED',assets:'2× BCT Armored, Patriot, HIMARS',strength:'~10,000 troops',note:'NATO eastern flank.',readiness:'HIGH'},
+  {id:'L02',branch:'LAND',align:'NATO',name:'NATO eFP — Baltic',loc:'Latvia / Estonia',lat:57.10,lon:24.80,status:'DEPLOYED',assets:'MBT (72), IFV (120)',strength:'~5,000 multinational',note:'Enhanced Forward Presence.',readiness:'HIGH'},
+  {id:'L03',branch:'LAND',align:'US',name:'US Army 2nd ID — USFK',loc:'Camp Humphreys, South Korea',lat:37.00,lon:127.05,status:'ELEVATED',assets:'ABCT, THAAD, Patriot',strength:'~28,500 USFK',note:'Tripwire deterrence vs DPRK.',readiness:'HIGH'},
+  {id:'L04',branch:'LAND',align:'ADVERSARY_RU',name:'Russian Army — Western MD',loc:'Belgorod Oblast, Russia',lat:50.60,lon:36.60,status:'ELEVATED',assets:'BTG×18, Iskander-M (24)',strength:'~85,000',note:'Ukraine operations. Reconstituting.',readiness:'MEDIUM'},
+  {id:'L05',branch:'LAND',align:'ADVERSARY_CN',name:'PLA Eastern Theater',loc:'Nanjing, China',lat:32.06,lon:118.80,status:'SURGE',assets:'71st/72nd/73rd GA, amphibious',strength:'~250,000 theater',note:'Taiwan Strait ground element.',readiness:'HIGH'},
+  {id:'L06',branch:'LAND',align:'ALLIED',name:'Ukrainian Armed Forces — Donetsk',loc:'Donetsk Oblast, Ukraine',lat:48.20,lon:37.50,status:'SURGE',assets:'M1A1, Leopard 2, HIMARS, F-16',strength:'~300,000 active front',note:'Active kinetic operations.',readiness:'HIGH'},
+  {id:'L07',branch:'LAND',align:'ALLIED',name:'IDF Ground Forces',loc:'Southern Israel',lat:31.30,lon:34.50,status:'SURGE',assets:'Merkava IV (400+), Iron Dome',strength:'~360,000 activated',note:'Multi-front ops Gaza/Lebanon.',readiness:'HIGH'},
+];
+const MIL_COLORS={US:'#ef4444',NATO:'#ef4444',ALLIED:'#f59e0b',ADVERSARY_RU:'#8b5cf6',ADVERSARY_CN:'#8b5cf6',ADVERSARY_IR:'#ec4899',NEUTRAL:'#94a3b8'};
+
+// ═══════════════════════════════════════
+// US MILITARY BASES — COMPREHENSIVE UNCLASSIFIED DATASET
+// branch: ARMY | NAVY | USAF | USMC | USSF | SOCOM | CONUS | OCONUS
+// role: PRIMARY MISSION CATEGORY
+// ═══════════════════════════════════════
+const US_BASES=[
+  // ── CONUS: ARMY ──────────────────────────────────────────────────────
+  {id:'B001',service:'ARMY',name:'Fort Liberty',prev:'Fort Bragg',loc:'Fayetteville, NC',lat:35.14,lon:-78.99,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~54,000',
+   purpose:'XVIII Airborne Corps HQ; 82nd ABN DIV; USASOC; JSOC; 4th POG; Special Forces Groups',
+   role:'POWER PROJECTION / SOF / AIRBORNE'},
+  {id:'B002',service:'ARMY',name:'Fort Campbell',loc:'Clarksville, TN/KY',lat:36.66,lon:-87.47,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~30,000',
+   purpose:'101st Airborne Div (AASLT); 160th SOAR (Night Stalkers); 5th SFG(A)',
+   role:'AIR ASSAULT / SOF AVIATION'},
+  {id:'B003',service:'ARMY',name:'Fort Stewart',loc:'Hinesville, GA',lat:31.87,lon:-81.61,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~24,000',
+   purpose:'3rd Infantry Division HQ; Mech/Armored BCTs; First Army Division East',
+   role:'HEAVY ARMOR / POWER PROJECTION'},
+  {id:'B004',service:'ARMY',name:'Fort Hood / Fort Cavazos',loc:'Killeen, TX',lat:31.13,lon:-97.78,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~36,000',
+   purpose:'III Armored Corps HQ; 1st Cavalry DIV; 13th Expeditionary Sustainment Cmd',
+   role:'ARMORED CORPS / SUSTAINMENT'},
+  {id:'B005',service:'ARMY',name:'Fort Bliss',loc:'El Paso, TX',lat:31.81,lon:-106.42,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~30,000',
+   purpose:'1st Armored DIV; 32nd AAMDC; Joint Readiness Training; Air Defense Artillery',
+   role:'ARMOR / AIR DEFENSE'},
+  {id:'B006',service:'ARMY',name:'Fort Wainwright',loc:'Fairbanks, AK',lat:64.83,lon:-147.63,
+   disposition:'ACTIVE — ELEVATED',personnel:'~10,000',
+   purpose:'1-25 SBCT (Arctic); Arctic warfare training; NORTHCOM surge element',
+   role:'ARCTIC WARFARE'},
+  {id:'B007',service:'ARMY',name:'Fort Richardson / JBER',loc:'Anchorage, AK',lat:61.25,lon:-149.69,
+   disposition:'ACTIVE — ELEVATED',personnel:'~12,000',
+   purpose:'Joint Base Elmendorf-Richardson; 4-25 ABCT; 11th Airborne Division HQ',
+   role:'ARCTIC / PACOM RESERVE'},
+  {id:'B008',service:'ARMY',name:'Fort Drum',loc:'Watertown, NY',lat:44.05,lon:-75.77,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~18,000',
+   purpose:'10th Mountain Division; rapid deployment CONUS to EUCOM/CENTCOM',
+   role:'LIGHT INFANTRY / RAPID DEPLOY'},
+  {id:'B009',service:'ARMY',name:'Fort Riley',loc:'Junction City, KS',lat:39.07,lon:-96.80,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~16,000',
+   purpose:'1st Infantry Division (Big Red One); Armored BCTs; Combined Arms Center',
+   role:'HEAVY ARMOR'},
+  {id:'B010',service:'ARMY',name:'Fort Leonard Wood',loc:'Pulaski Co., MO',lat:37.74,lon:-92.14,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~16,000',
+   purpose:'US Army Maneuver Support Center; Chemical, Biological, Radiological, Nuclear School; Military Police School; Engineer School',
+   role:'TRAINING / CBRN / MP / ENGINEER'},
+  {id:'B011',service:'ARMY',name:'Fort Benning / Fort Moore',loc:'Columbus, GA',lat:32.36,lon:-84.99,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~30,000',
+   purpose:'Maneuver Center of Excellence; Ranger School; Infantry / Armor basic training; 75th Ranger Regt',
+   role:'INFANTRY / RANGER / TRAINING'},
+  {id:'B012',service:'ARMY',name:'Fort Rucker / Fort Novosel',loc:'Daleville, AL',lat:31.33,lon:-85.72,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~8,000',
+   purpose:'US Army Aviation Center of Excellence; all Army rotary-wing pilot training',
+   role:'AVIATION TRAINING'},
+  {id:'B013',service:'ARMY',name:'Fort Knox',loc:'Elizabethtown, KY',lat:37.89,lon:-85.96,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~10,000',
+   purpose:'US Army Armor School; Cadet Command HQ; Bullion Depository',
+   role:'ARMOR TRAINING / FINANCE'},
+  {id:'B014',service:'ARMY',name:'Fort Leavenworth',loc:'Leavenworth, KS',lat:39.36,lon:-94.92,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~5,000',
+   purpose:'Combined Arms Center; Command & General Staff College; USDB',
+   role:'EDUCATION / C2 DOCTRINE'},
+  {id:'B015',service:'ARMY',name:'Fort Huachuca',loc:'Sierra Vista, AZ',lat:31.55,lon:-110.34,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~8,000',
+   purpose:'US Army Intelligence Center of Excellence; MI School; UAV training; NETCOM',
+   role:'INTELLIGENCE / SIGINT / UAV'},
+  {id:'B016',service:'ARMY',name:'Redstone Arsenal',loc:'Huntsville, AL',lat:34.68,lon:-86.65,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~40,000 (military+civilian)',
+   purpose:'Army Aviation and Missile Command (AMCOM); Missile Defense Agency; SMDC; NASA Marshall',
+   role:'MISSILE SYSTEMS / R&D'},
+  {id:'B017',service:'ARMY',name:'Aberdeen Proving Ground',loc:'Aberdeen, MD',lat:39.47,lon:-76.13,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~20,000',
+   purpose:'Army Test & Evaluation Command; Army Cyber Command (ARCYBER); C5ISR Center',
+   role:'TEST & EVAL / CYBER / C5ISR'},
+  {id:'B018',service:'ARMY',name:'Fort Gordon / Fort Eisenhower',loc:'Augusta, GA',lat:33.42,lon:-82.18,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~15,000',
+   purpose:'US Army Cyber Center of Excellence; Signal School; NSA Georgia; ARCYBER HQ',
+   role:'CYBER / SIGINT / SIGNAL'},
+  {id:'B019',service:'ARMY',name:'Fort Belvoir',loc:'Fairfax Co., VA',lat:38.72,lon:-77.15,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~50,000 (largest in US)',
+   purpose:'Defense Intelligence Agency HQ; NGA HQ; INSCOM; Army Geospatial Center',
+   role:'INTEL COMMUNITY HUB / IC AGENCIES'},
+  {id:'B020',service:'ARMY',name:'Pentagon / Fort Myer',loc:'Arlington, VA',lat:38.87,lon:-77.06,
+   disposition:'ACTIVE',personnel:'~26,000',
+   purpose:'OSD HQ; Joint Chiefs of Staff; Service Secretariats; Ceremonial units',
+   role:'NATIONAL COMMAND AUTHORITY'},
+  {id:'B021',service:'ARMY',name:'West Point USMA',loc:'West Point, NY',lat:41.39,lon:-73.96,
+   disposition:'ACTIVE',personnel:'~4,700 cadets',
+   purpose:'United States Military Academy; Officer commissioning; Army research institute',
+   role:'OFFICER EDUCATION'},
+  {id:'B022',service:'ARMY',name:'Fort Polk / Fort Johnson',loc:'Leesville, LA',lat:31.05,lon:-93.21,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~20,000',
+   purpose:'4th Security Force Assistance Brigade; JRTC (Joint Readiness Training Center)',
+   role:'COMBAT TRAINING CENTER / SFAB'},
+  {id:'B023',service:'ARMY',name:'Fort Shafter',loc:'Honolulu, HI',lat:21.35,lon:-157.89,
+   disposition:'ACTIVE — ELEVATED',personnel:'~5,000',
+   purpose:'US Army Pacific HQ (USARPAC); INDOPACOM land component',
+   role:'INDOPACOM LAND HQ'},
+  {id:'B024',service:'ARMY',name:'Schofield Barracks',loc:'Oahu, HI',lat:21.50,lon:-158.06,
+   disposition:'ACTIVE — ELEVATED',personnel:'~16,000',
+   purpose:'25th Infantry Division (Tropic Lightning); INDOPACOM rapid response',
+   role:'INDO-PACIFIC LIGHT INFANTRY'},
+  // ── CONUS: USAF ──────────────────────────────────────────────────────
+  {id:'B030',service:'USAF',name:'Langley AFB / Joint Base Langley-Eustis',loc:'Hampton, VA',lat:37.08,lon:-76.36,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~11,000',
+   purpose:'ACC HQ; 1st FW (F-22 Raptor); HQ Air Combat Command; NORTHCOM air component',
+   role:'AIR SUPREMACY / ACC HQ'},
+  {id:'B031',service:'USAF',name:'Nellis AFB',loc:'Las Vegas, NV',lat:36.24,lon:-115.03,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~14,000',
+   purpose:'USAF Warfare Center; Red Flag exercises; F-35 and aggressor squadrons; USAF Test & Tactics',
+   role:'COMBAT TRAINING / RED FLAG'},
+  {id:'B032',service:'USAF',name:'Edwards AFB',loc:'Kern County, CA',lat:34.90,lon:-117.88,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~10,000',
+   purpose:'Air Force Test Center; AFMC; Next-generation aircraft test (B-21, F-35); Developmental test',
+   role:'FLIGHT TEST / R&D'},
+  {id:'B033',service:'USAF',name:'Eglin AFB',loc:'Fort Walton Beach, FL',lat:30.48,lon:-86.53,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~10,000',
+   purpose:'Air Force Materiel Command; 96th Test Wing; weapons development; Air Armament Center',
+   role:'WEAPONS TEST / ARMAMENT'},
+  {id:'B034',service:'USAF',name:'Hurlburt Field',loc:'Mary Esther, FL',lat:30.43,lon:-86.69,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~9,000',
+   purpose:'AFSOC HQ; 1st SOW; AC-130 gunships; CV-22 Osprey; MC-130; PSYOP; CCAS',
+   role:'SOF AIR / AFSOC HQ'},
+  {id:'B035',service:'USAF',name:'MacDill AFB',loc:'Tampa, FL',lat:27.85,lon:-82.52,
+   disposition:'ACTIVE — ELEVATED',personnel:'~15,000',
+   purpose:'USCENTCOM HQ; USSOCOM HQ; 6th ARW (KC-135 tankers)',
+   role:'CENTCOM / SOCOM HQ'},
+  {id:'B036',service:'USAF',name:'Peterson SFB',loc:'Colorado Springs, CO',lat:38.81,lon:-104.70,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~12,000',
+   purpose:'NORAD HQ; USNORTHCOM HQ; USSF Space Delta operations',
+   role:'NORAD / NORTHCOM / SPACE'},
+  {id:'B037',service:'USAF',name:'Schriever SFB',loc:'Colorado Springs, CO',lat:38.80,lon:-104.53,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~5,000',
+   purpose:'Space Operations Command; GPS constellation ops; SBIRS; missile warning; ASAT programs',
+   role:'SPACE OPS / GPS / MISSILE WARN'},
+  {id:'B038',service:'USAF',name:'Buckley SFB',loc:'Aurora, CO',lat:39.72,lon:-104.75,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~6,500',
+   purpose:'Space Delta 4 (missile warning); NRO ops; DIA MSIC; Air National Guard ISR',
+   role:'MISSILE WARNING / NRO / ISR'},
+  {id:'B039',service:'USAF',name:'Kirtland AFB',loc:'Albuquerque, NM',lat:35.04,lon:-106.60,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~24,000',
+   purpose:'AFNWC (nuclear weapons center); DTRA testing; Space & Missile Systems; energy research',
+   role:'NUCLEAR WEAPONS / R&D'},
+  {id:'B040',service:'USAF',name:'Cannon AFB',loc:'Clovis, NM',lat:34.38,lon:-103.32,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~4,500',
+   purpose:'AFSOC; 27th SOW; AC-130J Ghostrider; CV-22; MC-130J; ISR/SOF integration',
+   role:'SOF AIR OPS'},
+  {id:'B041',service:'USAF',name:'Minot AFB',loc:'Minot, ND',lat:48.42,lon:-101.36,
+   disposition:'ACTIVE — ELEVATED',personnel:'~7,000',
+   purpose:'AFGSC; 91st Missile Wing (Minuteman III ICBMs ×150); 5th BW (B-52H)',
+   role:'NUCLEAR — ICBM / BOMBER'},
+  {id:'B042',service:'USAF',name:'Malmstrom AFB',loc:'Great Falls, MT',lat:47.51,lon:-111.19,
+   disposition:'ACTIVE — ELEVATED',personnel:'~4,000',
+   purpose:'341st Missile Wing; Minuteman III ICBMs ×150; AFGSC wing',
+   role:'NUCLEAR — ICBM'},
+  {id:'B043',service:'USAF',name:'F.E. Warren AFB',loc:'Cheyenne, WY',lat:41.14,lon:-104.92,
+   disposition:'ACTIVE — ELEVATED',personnel:'~4,000',
+   purpose:'90th Missile Wing; Minuteman III ICBMs ×150; oldest continually active AF base',
+   role:'NUCLEAR — ICBM'},
+  {id:'B044',service:'USAF',name:'Whiteman AFB',loc:'Knob Noster, MO',lat:38.73,lon:-93.55,
+   disposition:'ACTIVE — SURGE',personnel:'~6,000',
+   purpose:'509th BW; B-2A Spirit stealth bomber (20 aircraft); 442nd FW A-10; AFGSC',
+   role:'NUCLEAR — STEALTH BOMBER'},
+  {id:'B045',service:'USAF',name:'Barksdale AFB',loc:'Bossier City, LA',lat:32.50,lon:-93.66,
+   disposition:'ACTIVE — ELEVATED',personnel:'~8,000',
+   purpose:'AFGSC HQ; 2nd BW (B-52H Stratofortress); nuclear cruise missile ops',
+   role:'NUCLEAR — BOMBER / AFGSC HQ'},
+  {id:'B046',service:'USAF',name:'Dyess AFB',loc:'Abilene, TX',lat:32.42,lon:-99.85,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~5,000',
+   purpose:'7th BW (B-1B Lancer); first B-21 Raider operational wing (projected 2026)',
+   role:'CONVENTIONAL / NUCLEAR BOMBER'},
+  {id:'B047',service:'USAF',name:'Ellsworth AFB',loc:'Box Elder, SD',lat:44.14,lon:-103.10,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~4,500',
+   purpose:'28th BW (B-1B Lancer); B-21 Raider initial cadre training',
+   role:'LONG-RANGE STRIKE BOMBER'},
+  {id:'B048',service:'USAF',name:'Offutt AFB',loc:'Bellevue, NE',lat:41.12,lon:-95.91,
+   disposition:'ACTIVE — ELEVATED',personnel:'~10,000',
+   purpose:'USSTRATCOM HQ; 55th Wing (RC-135 Rivet Joint, E-4B NAOC, E-8C JSTARS); nuclear C2',
+   role:'STRATCOM / NUCLEAR C2 / ISR'},
+  {id:'B049',service:'USAF',name:'Joint Base San Antonio',loc:'San Antonio, TX',lat:29.38,lon:-98.62,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~75,000 (largest joint base)',
+   purpose:'AF Medical Center; AF Basic Training (BMT); AF ISR Agency; 16th AF (cyber/info ops)',
+   role:'TRAINING / CYBER / MEDICAL / ISR'},
+  {id:'B050',service:'USAF',name:'Patrick SFB / Cape Canaveral',loc:'Brevard Co., FL',lat:28.23,lon:-80.60,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~12,000',
+   purpose:'Space Launch Delta 45; Eastern Range; Space Force launch operations; NRO payloads',
+   role:'SPACE LAUNCH / EASTERN RANGE'},
+  {id:'B051',service:'USAF',name:'Vandenberg SFB',loc:'Lompoc, CA',lat:34.74,lon:-120.57,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~15,000',
+   purpose:'Space Launch Delta 30; ICBM test launches; Space Force Western Range; NRO; LEO launches',
+   role:'SPACE LAUNCH / ICBM TEST / WESTERN RANGE'},
+  {id:'B052',service:'USAF',name:'Wright-Patterson AFB',loc:'Dayton, OH',lat:39.83,lon:-84.05,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~30,000',
+   purpose:'AFMC HQ; AFRL; Air Force Institute of Technology; National Air & Space Intelligence Center (NASIC)',
+   role:'R&D / INTEL / AFMC HQ'},
+  {id:'B053',service:'USAF',name:'Robins AFB',loc:'Warner Robins, GA',lat:32.64,lon:-83.59,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~24,000',
+   purpose:'Air Force Sustainment Center; C-17, C-5, B-1B, F-15 depot; WR-ALC',
+   role:'LOGISTICS / DEPOT MAINTENANCE'},
+  {id:'B054',service:'USAF',name:'Hill AFB',loc:'Ogden, UT',lat:41.12,lon:-111.97,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~20,000',
+   purpose:'Ogden ALC; F-35A wing (388th FW); ICBM reentry vehicle maintenance; Minuteman III depot',
+   role:'F-35 / ICBM SUSTAINMENT'},
+  {id:'B055',service:'USAF',name:'Tinker AFB',loc:'Oklahoma City, OK',lat:35.41,lon:-97.39,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~27,000',
+   purpose:'Oklahoma City ALC; E-3 AWACS; KC-135 depot; B-2, B-52 engine; Air Force Sustainment Center',
+   role:'DEPOT / AWACS / SUSTAINMENT'},
+  // ── CONUS: NAVY / MARINES ────────────────────────────────────────────
+  {id:'B060',service:'NAVY',name:'Naval Station Norfolk',loc:'Norfolk, VA',lat:36.94,lon:-76.31,
+   disposition:'ACTIVE — ELEVATED',personnel:'~80,000 (largest naval base world)',
+   purpose:'LANTFLT HQ; US 2nd Fleet; multiple CVN/LHA homeports; NATO SACLANT legacy',
+   role:'ATLANTIC FLEET HQ / CVN HOMEPORT'},
+  {id:'B061',service:'NAVY',name:'NAS Oceana',loc:'Virginia Beach, VA',lat:36.82,lon:-76.03,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~15,000',
+   purpose:'East Coast Master Jet Base; F/A-18E/F Super Hornet; EA-18G Growler; carrier air wings',
+   role:'CARRIER AIR WING / EAST COAST'},
+  {id:'B062',service:'NAVY',name:'NAS Patuxent River',loc:'St. Mary\'s Co., MD',lat:38.29,lon:-76.41,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~20,000',
+   purpose:'Naval Air Systems Command (NAVAIR); Navy test pilot school; F-35 developmental test',
+   role:'NAVAL AVIATION TEST / NAVAIR'},
+  {id:'B063',service:'NAVY',name:'Naval Station Mayport',loc:'Jacksonville, FL',lat:30.39,lon:-81.42,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~20,000',
+   purpose:'2nd Fleet; DDG/LCS/LPH homeport; FDNF carrier capable pier; theater ASW hub',
+   role:'SURFACE WARFARE / ATLANTIC'},
+  {id:'B064',service:'NAVY',name:'NS Pearl Harbor / JBPHH',loc:'Pearl Harbor, HI',lat:21.36,lon:-157.97,
+   disposition:'ACTIVE — ELEVATED',personnel:'~40,000',
+   purpose:'PACFLT HQ; US 3rd/7th Fleet; SSN/SSBN homeport; INDOPACOM naval component',
+   role:'PACIFIC FLEET HQ / SUBMARINE'},
+  {id:'B065',service:'NAVY',name:'NS San Diego / 32nd St',loc:'San Diego, CA',lat:32.68,lon:-117.14,
+   disposition:'ACTIVE — ELEVATED',personnel:'~30,000',
+   purpose:'3rd Fleet; surface warfare combatants; LHA/LHD ARG homeport; Expeditionary Strike',
+   role:'SURFACE / AMPHIBIOUS PACIFIC'},
+  {id:'B066',service:'NAVY',name:'NAS North Island',loc:'Coronado, CA',lat:32.70,lon:-117.21,
+   disposition:'ACTIVE — ELEVATED',personnel:'~35,000',
+   purpose:'West Coast Master Jet Base; CVN homeport (USS Carl Vinson etc.); SEAL delivery vehicle',
+   role:'CARRIER HOMEPORT / WEST COAST'},
+  {id:'B067',service:'NAVY',name:'NAVBASE Kitsap (Bremerton/Bangor)',loc:'Bremerton, WA',lat:47.56,lon:-122.65,
+   disposition:'ACTIVE — ELEVATED',personnel:'~20,000',
+   purpose:'Trident II D5 SSBN homeport (Ohio-class); CVN homeport (USS Nimitz); NSFS stockpile',
+   role:'SSBN / CVN HOMEPORT / NUCLEAR'},
+  {id:'B068',service:'NAVY',name:'NAS Jacksonville',loc:'Jacksonville, FL',lat:30.23,lon:-81.68,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~22,000',
+   purpose:'P-8A Poseidon ASW/ISR; E-6B TACAMO (nuclear comms relay); VP/VQ squadrons',
+   role:'ASW / NUCLEAR COMMS / P-8A'},
+  {id:'B069',service:'NAVY',name:'NS Kings Bay',loc:'St. Mary\'s, GA',lat:30.79,lon:-81.56,
+   disposition:'ACTIVE — ELEVATED',personnel:'~10,000',
+   purpose:'East Coast SSBN homeport; 14 Ohio-class boats; Strategic Weapons Facility Atlantic',
+   role:'SSBN / TRIDENT NUCLEAR'},
+  {id:'B070',service:'NAVY',name:'NAVSUB Base New London / Groton',loc:'Groton, CT',lat:41.35,lon:-72.09,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~15,000',
+   purpose:'Submarine Force HQ; SSN training; Naval Submarine School; Electric Boat adjacent',
+   role:'SUBMARINE HQ / TRAINING'},
+  {id:'B071',service:'USMC',name:'MCB Camp Lejeune',loc:'Jacksonville, NC',lat:34.65,lon:-77.35,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~50,000',
+   purpose:'II MEF HQ; 2nd Marine Div; 2nd Marine Logistics Group; 2nd Marine Aircraft Wing',
+   role:'EAST COAST MEF / AMPHIBIOUS'},
+  {id:'B072',service:'USMC',name:'MCB Camp Pendleton',loc:'Oceanside, CA',lat:33.38,lon:-117.42,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~55,000',
+   purpose:'I MEF HQ; 1st Marine Div; 1st MLG; 3rd Marine Aircraft Wing; amphibious ready groups',
+   role:'WEST COAST MEF / AMPHIBIOUS'},
+  {id:'B073',service:'USMC',name:'MCAS Cherry Point',loc:'Havelock, NC',lat:34.90,lon:-76.88,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~12,000',
+   purpose:'2nd MAW; F/A-18C Hornet; EA-6B Prowler legacy; VMAQ EW; depot maintenance',
+   role:'TACTICAL AVIATION / EW / DEPOT'},
+  {id:'B074',service:'USMC',name:'MCAS Miramar',loc:'San Diego, CA',lat:32.87,lon:-117.14,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~22,000',
+   purpose:'3rd MAW; F-35B/C; F/A-18 squadrons; MV-22 Osprey; Marine attack/fighter-attack',
+   role:'TACTICAL AVIATION WEST'},
+  {id:'B075',service:'USMC',name:'MCB Quantico',loc:'Quantico, VA',lat:38.52,lon:-77.37,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~30,000',
+   purpose:'Marine Corps University; Officer Candidates School; Marine Corps Intelligence Activity; FBI Academy co-located',
+   role:'TRAINING / INTEL / EDUCATION'},
+  {id:'B076',service:'USMC',name:'MCB Hawaii',loc:'Kaneohe Bay, HI',lat:21.45,lon:-157.77,
+   disposition:'ACTIVE — ELEVATED',personnel:'~10,000',
+   purpose:'3rd Marine Regiment; 1st Marine Raider Bn; MARSOC; INDOPACOM amphibious element',
+   role:'INDOPACOM / MARSOC / RAIDER'},
+  // ── CONUS: SOCOM / SPECIAL OPS ───────────────────────────────────────
+  {id:'B080',service:'SOCOM',name:'USSOCOM HQ — MacDill',loc:'Tampa, FL',lat:27.84,lon:-82.51,
+   disposition:'ACTIVE — ELEVATED',personnel:'~6,000 HQ',
+   purpose:'US Special Operations Command HQ; Theater SOCs; Joint Acquisition; SOF policy',
+   role:'SOF COMMAND / GLOBAL OPS HQ'},
+  {id:'B081',service:'SOCOM',name:'DEVGRU / Dam Neck Annex',loc:'Virginia Beach, VA',lat:36.68,lon:-76.00,
+   disposition:'ACTIVE — ELEVATED',personnel:'CLASSIFIED',
+   purpose:'Naval Special Warfare Development Group (SEAL Team 6); Tier 1 CT; direct action',
+   role:'TIER 1 CT — MARITIME SOF'},
+  {id:'B082',service:'SOCOM',name:'Delta Force / Fort Liberty',loc:'Fayetteville, NC',lat:35.15,lon:-79.00,
+   disposition:'ACTIVE — ELEVATED',personnel:'CLASSIFIED',
+   purpose:'1st SFOD-D (Delta Force); Tier 1 CT; direct action; hostage rescue; JSOC element',
+   role:'TIER 1 CT — LAND SOF'},
+  {id:'B083',service:'SOCOM',name:'75th Ranger Regiment HQ',loc:'Fort Benning, GA',lat:32.38,lon:-84.97,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~3,500',
+   purpose:'75th Ranger Regiment; Ranger Bns 1/2/3; special light infantry; JSOC conventional arm',
+   role:'DIRECT ACTION / AIRFIELD SEIZURE'},
+  {id:'B084',service:'ARMY',name:'USAJFKSWCS — Fort Liberty',loc:'Fayetteville, NC',lat:35.16,lon:-79.01,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~4,500',
+   purpose:'JFK Special Warfare Center; SF qualification (Q Course); PSYOP School; Civil Affairs School',
+   role:'SOF TRAINING / QUALIFICATION'},
+  // ── OCONUS: EUROPE ────────────────────────────────────────────────────
+  {id:'B090',service:'ARMY',name:'USAREUR-AF HQ — Wiesbaden',loc:'Wiesbaden, Germany',lat:50.06,lon:8.33,
+   disposition:'ACTIVE — ELEVATED',personnel:'~40,000 theater',
+   purpose:'US Army Europe and Air Forces HQ; theater land component; NATO Article 5 HQ',
+   role:'EUCOM LAND / NATO ARTICLE 5'},
+  {id:'B091',service:'USAF',name:'Ramstein AB',loc:'Ramstein, Germany',lat:49.44,lon:7.60,
+   disposition:'ACTIVE — ELEVATED',personnel:'~54,000',
+   purpose:'USAFE-AFAFRICA HQ; EUCOM air component; airlift hub; NATO air C2; MQ-9 relay',
+   role:'EUCOM AIR HQ / AIRLIFT'},
+  {id:'B092',service:'USAF',name:'Spangdahlem AB',loc:'Spangdahlem, Germany',lat:50.13,lon:6.69,
+   disposition:'ACTIVE — ELEVATED',personnel:'~5,000',
+   purpose:'52nd FW; F-16CM; NATO integrated air defense; support EUCOM surge',
+   role:'TACTICAL FIGHTER / EUCOM'},
+  {id:'B093',service:'USAF',name:'RAF Lakenheath',loc:'Suffolk, UK',lat:52.41,lon:0.56,
+   disposition:'ACTIVE — SURGE',personnel:'~10,000',
+   purpose:'48th Fighter Wing; F-35A Lightning II; F-15E Strike Eagle; DCA; nuclear-capable',
+   role:'NUCLEAR-CAPABLE / F-35 EUROPE'},
+  {id:'B094',service:'USAF',name:'RAF Mildenhall',loc:'Suffolk, UK',lat:52.36,lon:0.49,
+   disposition:'ACTIVE — ELEVATED',personnel:'~5,000',
+   purpose:'100th ARW (KC-135 tankers); 352nd SOG (CV-22, MC-130J); AFSOC Europe element',
+   role:'TANKER / SOF EUROPE'},
+  {id:'B095',service:'NAVY',name:'NSA Naples',loc:'Naples, Italy',lat:40.89,lon:14.29,
+   disposition:'ACTIVE — ELEVATED',personnel:'~10,000',
+   purpose:'US 6th Fleet HQ; NAVEUR-NAVAF HQ; NATO maritime C2; submarine tender periodic',
+   role:'6TH FLEET / MEDITERRANEAN HQ'},
+  {id:'B096',service:'NAVY',name:'NAS Sigonella',loc:'Sicily, Italy',lat:37.40,lon:14.92,
+   disposition:'ACTIVE — ELEVATED',personnel:'~5,000',
+   purpose:'P-8A Poseidon; MQ-4C Triton; AFRICOM ISR hub; Mediterranean sub-hunting',
+   role:'ISR / ASW / MED PIVOT'},
+  {id:'B097',service:'NAVY',name:'NS Rota',loc:'Rota, Spain',lat:36.64,lon:-6.35,
+   disposition:'ACTIVE — ELEVATED',personnel:'~4,000',
+   purpose:'4 BMD-capable Arleigh Burke DDGs homeport; missile defense Europe; NATO IBCS node',
+   role:'BALLISTIC MISSILE DEFENSE / NATO'},
+  {id:'B098',service:'ARMY',name:'Camp Darby',loc:'Livorno, Italy',lat:43.64,lon:10.37,
+   disposition:'ACTIVE — PREPOSITIONED',personnel:'~2,500',
+   purpose:'USAREUR prepositioned stocks; armor/artillery; rapid reinforcement EUCOM',
+   role:'WAR RESERVE STOCKS / PREPOSITIONING'},
+  {id:'B099',service:'ARMY',name:'Chièvres Air Base',loc:'Chièvres, Belgium',lat:50.57,lon:3.83,
+   disposition:'ACTIVE',personnel:'~2,500',
+   purpose:'SHAPE HQ support; USAG Benelux; NATO Supreme HQ Allied Powers Europe logistics',
+   role:'NATO SHAPE HQ SUPPORT'},
+  {id:'B100',service:'ARMY',name:'Grafenwöhr Training Area',loc:'Bavaria, Germany',lat:49.70,lon:11.87,
+   disposition:'ACTIVE — ELEVATED',personnel:'~12,000',
+   purpose:'JMTC; largest US Army training area outside CONUS; armor/combined arms exercises; Ukraine COIN training hub',
+   role:'COMBAT TRAINING / EUCOM READINESS'},
+  {id:'B101',service:'USAF',name:'Incirlik AB',loc:'Adana, Turkey',lat:37.00,lon:35.43,
+   disposition:'ACTIVE — CONSTRAINED',personnel:'~1,500',
+   purpose:'Nuclear weapons storage (B61 bombs est. ×50); tanker/airlift staging; NATO dual-key',
+   role:'NUCLEAR STORAGE / TANKER STAGING'},
+  {id:'B102',service:'ARMY',name:'Camp Bondsteel',loc:'Ferizaj, Kosovo',lat:42.36,lon:21.35,
+   disposition:'ACTIVE — DEPLOYED',personnel:'~5,500',
+   purpose:'KFOR land component; NATO peacekeeping; US Balkans presence; SE Europe rapid deploy hub',
+   role:'PEACEKEEPING / BALKANS PRESENCE'},
+  // ── OCONUS: INDOPACOM ─────────────────────────────────────────────────
+  {id:'B110',service:'USAF',name:'Kadena AB',loc:'Okinawa, Japan',lat:26.35,lon:127.77,
+   disposition:'ACTIVE — ELEVATED',personnel:'~18,000',
+   purpose:'18th Wing; F-15C/D (transition to F-15EX); RC-135; U-2S; E-3 AWACS; PACAF primary hub',
+   role:'INDOPACOM AIR POWER / ISR'},
+  {id:'B111',service:'USAF',name:'Andersen AFB',loc:'Guam',lat:13.58,lon:144.93,
+   disposition:'ACTIVE — SURGE',personnel:'~14,000',
+   purpose:'36th Wing; B-52H; B-2A; F-22A; tankers; strategic bomber deterrence INDOPACOM',
+   role:'STRATEGIC BOMBER / DETERRENCE'},
+  {id:'B112',service:'NAVY',name:'NS Guam / Apra Harbor',loc:'Guam',lat:13.44,lon:144.66,
+   disposition:'ACTIVE — ELEVATED',personnel:'~10,000',
+   purpose:'SSN homeport; surface combatant hub; P-8A; 7th Fleet forward logistics',
+   role:'SUBMARINE / 7TH FLEET LOGISTICS'},
+  {id:'B113',service:'USMC',name:'MCAS Futenma / MCB Camp Butler',loc:'Okinawa, Japan',lat:26.27,lon:127.75,
+   disposition:'ACTIVE — ELEVATED',personnel:'~15,000',
+   purpose:'III MEF; 1st Marine Aircraft Wing; MV-22 Osprey; CH-53; AH-1Z; amphibious rapid react',
+   role:'III MEF / INDOPACOM AMPHIBIOUS'},
+  {id:'B114',service:'ARMY',name:'Camp Humphreys',loc:'Pyeongtaek, South Korea',lat:37.00,lon:127.06,
+   disposition:'ACTIVE — ELEVATED',personnel:'~36,000 (largest overseas)',
+   purpose:'USFK HQ; 8th Army HQ; 2nd ID; THAAD battery; Patriot; OPCON Korean theater',
+   role:'USFK HQ / KOREA DETERRENCE'},
+  {id:'B115',service:'USAF',name:'Osan AB',loc:'Pyeongtaek, South Korea',lat:37.09,lon:127.03,
+   disposition:'ACTIVE — ELEVATED',personnel:'~10,000',
+   purpose:'7th AF HQ; F-16C/D; A-10C; OA-10; combined air ops ROKAF/USAF; KADO',
+   role:'7TH AIR FORCE / KOREA AIR OPS'},
+  {id:'B116',service:'USAF',name:'Kunsan AB',loc:'Gunsan, South Korea',lat:35.90,lon:126.62,
+   disposition:'ACTIVE — ELEVATED',personnel:'~3,500',
+   purpose:'8th FW "Wolf Pack"; F-16C/D Block 40; surge airfield Korea; near DPRK rocket range',
+   role:'TACTICAL FIGHTER / DPRK DETERRENCE'},
+  {id:'B117',service:'USAF',name:'Misawa AB',loc:'Aomori, Japan',lat:40.70,lon:141.37,
+   disposition:'ACTIVE — ELEVATED',personnel:'~10,000',
+   purpose:'35th FW (F-16CM SEAD); NSA Misawa (SIGINT/ELINT Japan Sea); Naval Air Facility',
+   role:'SEAD / SIGINT / ELINT'},
+  {id:'B118',service:'NAVY',name:'NAF Atsugi',loc:'Kanagawa, Japan',lat:35.46,lon:139.45,
+   disposition:'ACTIVE — ELEVATED',personnel:'~10,000',
+   purpose:'CVW-5 (Carrier Air Wing Five) homeport; E-2C/D Hawkeye; EA-18G; 7th Fleet air element',
+   role:'CARRIER AIR WING / 7TH FLEET'},
+  {id:'B119',service:'NAVY',name:'NS Yokosuka',loc:'Yokosuka, Japan',lat:35.29,lon:139.67,
+   disposition:'ACTIVE — ELEVATED',personnel:'~25,000',
+   purpose:'7th Fleet HQ; USS George Washington (CVN-73) homeport; forward-deployed naval force',
+   role:'7TH FLEET HQ / CVN FORWARD DEPLOY'},
+  {id:'B120',service:'NAVY',name:'Diego Garcia (BIOT)',loc:'Indian Ocean',lat:-7.31,lon:72.41,
+   disposition:'ACTIVE — ELEVATED',personnel:'~4,000',
+   purpose:'NSF Diego Garcia; B-52 rotational; P-8A; nuclear sub tender; PREPO ships; CENTCOM/INDOPACOM pivot',
+   role:'POWER PROJECTION / INDIAN OCEAN'},
+  {id:'B121',service:'NAVY',name:'NSA Bahrain / 5th Fleet HQ',loc:'Manama, Bahrain',lat:26.23,lon:50.61,
+   disposition:'ACTIVE — ELEVATED',personnel:'~8,000',
+   purpose:'5th Fleet HQ; NAVCENT; Combined Maritime Forces; Houthi response coordination',
+   role:'5TH FLEET / CENTCOM MARITIME HQ'},
+  {id:'B122',service:'ARMY',name:'Ali Al Salem AB',loc:'Kuwait',lat:29.34,lon:47.52,
+   disposition:'ACTIVE — DEPLOYED',personnel:'~12,000 theater',
+   purpose:'ARCENT; CFLCC; theater army; rapid response Iraq/KSA; CENTCOM land element',
+   role:'CENTCOM LAND / KUWAIT GARRISON'},
+  {id:'B123',service:'USAF',name:'Al Dhafra AB',loc:'Abu Dhabi, UAE',lat:24.25,lon:54.55,
+   disposition:'ACTIVE — ELEVATED',personnel:'~5,000',
+   purpose:'F-35A; B-52H rotational; U-2S; Global Hawk; ISR hub; CENTCOM air element UAE',
+   role:'CENTCOM AIR / ISR / STEALTH OPS'},
+  {id:'B124',service:'USAF',name:'Prince Sultan AB',loc:'Al Kharj, Saudi Arabia',lat:24.06,lon:47.58,
+   disposition:'ACTIVE — ELEVATED',personnel:'~2,500',
+   purpose:'F-15C/D; F-35A rotational; CENTCOM air deterrence; surge capability KSA',
+   role:'CENTCOM AIR / KSA DETERRENCE'},
+  {id:'B125',service:'USAF',name:'Bagram Airfield (former)',loc:'Parwan, Afghanistan',lat:34.95,lon:69.27,
+   disposition:'CLOSED — WITHDRAWN AUG 2021',personnel:'0 — ABANDONED',
+   purpose:'Former USAF/ISAF primary hub Afghanistan. Handed to Afghan forces. Seized by Taliban Aug 2021.',
+   role:'FORMER OEF HUB — CLOSED'},
+  // ── OCONUS: CENTCOM AFLOAT / SMALL FOOTPRINT ─────────────────────────
+  {id:'B130',service:'USAF',name:'Camp Lemonnier',loc:'Djibouti',lat:11.55,lon:43.16,
+   disposition:'ACTIVE — ELEVATED',personnel:'~4,000',
+   purpose:'CJTF-HOA HQ; MQ-9 Reaper; P-3/P-8A; AFRICOM counter-terrorism ops; Horn of Africa',
+   role:'AFRICOM CT / ISR / HOA'},
+  {id:'B131',service:'ARMY',name:'Novo Selo Training Area',loc:'Bulgaria',lat:42.41,lon:26.34,
+   disposition:'ACTIVE — ELEVATED',personnel:'~500 rotational',
+   purpose:'Rotational US/NATO training; EUCOM reassurance; flanking Russia Black Sea',
+   role:'NATO REASSURANCE / SE FLANK'},
+  // ── OCONUS: LATIN AMERICA ─────────────────────────────────────────────
+  {id:'B140',service:'USAF',name:'Soto Cano AB',loc:'Comayagua, Honduras',lat:14.38,lon:-87.62,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~600',
+   purpose:'JTF-Bravo; SOUTHCOM drug interdiction; UH-60; counter-narcotics rotary wing; HA/DR',
+   role:'SOUTHCOM CT / COUNTER-NARCOTICS'},
+  {id:'B141',service:'NAVY',name:'NSA Guantanamo Bay',loc:'Cuba',lat:19.90,lon:-75.14,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~6,000',
+   purpose:'Detention facility; GTMO tribunal; SOUTHCOM; logistics; Caribbean maritime patrol hub',
+   role:'DETENTION / SOUTHCOM / MARITIME'},
+  // ── MISSILE DEFENSE SITES ────────────────────────────────────────────
+  {id:'B150',service:'USSF',name:'Clear SFS (Alaska)',loc:'Nenana, AK',lat:64.29,lon:-149.19,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~500',
+   purpose:'Upgraded Early Warning Radar (UEWR); BMDS missile warning; NORAD sensor node',
+   role:'BMDS MISSILE WARNING'},
+  {id:'B151',service:'USSF',name:'Beale AFB / Ground-Based Midcourse Defense',loc:'Marysville, CA',lat:39.13,lon:-121.44,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~5,000',
+   purpose:'9th Recon Wing (U-2, RQ-4 Global Hawk); GBMDs; USNORTHCOM missile defense',
+   role:'MISSILE DEFENSE / ISR / U-2'},
+  {id:'B152',service:'ARMY',name:'Fort Greely GMD Site',loc:'Delta Junction, AK',lat:63.94,lon:-145.74,
+   disposition:'ACTIVE — ELEVATED',personnel:'~500',
+   purpose:'44 Ground-Based Interceptors (GBI); homeland ICBM defense; BMDS primary engagement',
+   role:'HOMELAND ICBM DEFENSE'},
+  {id:'B153',service:'USSF',name:'Thule AB (Pituffik SB)',loc:'Northwest Greenland',lat:76.53,lon:-68.70,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~600',
+   purpose:'Ballistic Missile Early Warning System (BMEWS); space surveillance; PAVE PAWS radar',
+   role:'BMEWS / ARCTIC / SPACE SURVEILLANCE'},
+  {id:'B154',service:'USSF',name:'Cape Cod SFS',loc:'Bourne, MA',lat:41.65,lon:-70.52,
+   disposition:'ACTIVE — FULL STRENGTH',personnel:'~1,000',
+   purpose:'PAVE PAWS BMEWS radar; 21st Space Wing sensor; NORAD Atlantic sector',
+   role:'BMEWS / ATLANTIC SENSOR'},
+];
+
+// Branch color coding for US bases
+const BASE_COLORS={
+  ARMY:'#22c55e',
+  USAF:'#3b82f6',
+  NAVY:'#06b6d4',
+  USMC:'#f97316',
+  SOCOM:'#8b5cf6',
+  USSF:'#a78bfa',
+};
+const BASE_ICONS={ARMY:'▪',USAF:'▲',NAVY:'●',USMC:'◆',SOCOM:'★',USSF:'✦'};
+
+let hoveredBase=null;
+
+function drawUSBases(){
+  const t=Date.now()/1000;
+  const W=ovC.width,H=ovC.height;
+  for(const b of US_BASES){
+    const s=ll2s(b.lat,b.lon);
+    if(s.x<-20||s.x>W+20||s.y<-20||s.y>H+20)continue;
+    const isClosed=b.disposition.includes('CLOSED');
+    const col=isClosed?'#374151':BASE_COLORS[b.service]||'#94a3b8';
+    const isHov=hoveredBase&&hoveredBase.id===b.id;
+    const alpha=isClosed?0.35:isHov?1.0:0.80;
+
+    octx.save();
+    octx.globalAlpha=alpha;
+
+    // Outer glow
+    if(!isClosed){
+      const grd=octx.createRadialGradient(s.x,s.y,0,s.x,s.y,isHov?18:10);
+      grd.addColorStop(0,col+'30');grd.addColorStop(1,col+'00');
+      octx.beginPath();octx.arc(s.x,s.y,isHov?18:10,0,Math.PI*2);
+      octx.fillStyle=grd;octx.fill();
+    }
+
+    // Pulse ring for active elevated/surge bases
+    if(!isClosed&&(b.disposition.includes('ELEVATED')||b.disposition.includes('SURGE'))){
+      const pulse=Math.sin(t*1.8+b.lat)*0.3+0.7;
+      octx.globalAlpha=alpha*pulse*0.5;
+      octx.strokeStyle=col;octx.lineWidth=1;
+      octx.beginPath();octx.arc(s.x,s.y,isHov?16:9,0,Math.PI*2);octx.stroke();
+      octx.globalAlpha=alpha;
+    }
+
+    // Base marker — pentagon shape (DoD symbol)
+    const sz=isHov?7:5;
+    octx.fillStyle=col+'33';
+    octx.strokeStyle=col;
+    octx.lineWidth=isHov?1.8:1.2;
+    // Draw pentagon
+    octx.beginPath();
+    for(let i=0;i<5;i++){
+      const angle=(i*2*Math.PI/5)-Math.PI/2;
+      const x=s.x+Math.cos(angle)*sz;
+      const y=s.y+Math.sin(angle)*sz;
+      i===0?octx.moveTo(x,y):octx.lineTo(x,y);
+    }
+    octx.closePath();
+    octx.fill();
+    octx.stroke();
+
+    // Service branch icon in center
+    if(zoom>=4||isHov){
+      octx.font=`bold ${isHov?9:7}px Share Tech Mono`;
+      octx.fillStyle=col;
+      octx.textAlign='center';
+      octx.textBaseline='middle';
+      octx.fillText(BASE_ICONS[b.service]||'●',s.x,s.y);
+      octx.textBaseline='alphabetic';
+    }
+
+    // Label — show at zoom 4+ or when hovered
+    if(zoom>=4||isHov){
+      const lbl=b.name.split('/')[0].trim();
+      const shortLbl=lbl.length>22?lbl.slice(0,20)+'…':lbl;
+      octx.font=`${isHov?'bold ':''} 9px Share Tech Mono`;
+      octx.textAlign='left';
+      const lw=octx.measureText(shortLbl).width;
+      octx.fillStyle='rgba(1,6,16,0.88)';
+      octx.fillRect(s.x+sz+2,s.y-7,lw+5,11);
+      octx.fillStyle=isClosed?'#4a5568':col;
+      octx.fillText(shortLbl,s.x+sz+4,s.y+1);
+    }
+
+    octx.restore();
+  }
+  octx.textAlign='left';
+  octx.textBaseline='alphabetic';
+}
+
+function baseAt(mx,my){
+  let best=null,bd=Infinity;
+  for(const b of US_BASES){
+    const s=ll2s(b.lat,b.lon);
+    const d=Math.hypot(s.x-mx,s.y-my);
+    if(d<12&&d<bd){bd=d;best=b;}
+  }
+  return best;
+}
+
+function drawMilDisp(){
+  const t=Date.now()/1000;
+  for(const u of MIL_UNITS){
+    const s=ll2s(u.lat,u.lon);if(s.x<-30||s.x>ovC.width+30||s.y<-30||s.y>ovC.height+30)continue;
+    const col=MIL_COLORS[u.align]||'#94a3b8';const alpha={SURGE:0.95,ELEVATED:0.80,DEPLOYED:0.65}[u.status]||0.65;
+    const isHov=hoveredUnit&&hoveredUnit.id===u.id;const isSurge=u.status==='SURGE';const sz=isSurge?10:u.status==='ELEVATED'?8:6;
+    octx.save();octx.globalAlpha=isHov?1.0:alpha;
+    if(isSurge||isHov){const pulse=Math.sin(t*2.5+u.lat)*0.35+0.65;octx.strokeStyle=col;octx.lineWidth=1.5;octx.globalAlpha=(isHov?0.9:0.4)*pulse;octx.beginPath();octx.arc(s.x,s.y,sz*2.4,0,Math.PI*2);octx.stroke();octx.globalAlpha=isHov?1.0:alpha;}
+    const grd=octx.createRadialGradient(s.x,s.y,0,s.x,s.y,sz*2.5);grd.addColorStop(0,col+'33');grd.addColorStop(1,col+'00');octx.beginPath();octx.arc(s.x,s.y,sz*2.5,0,Math.PI*2);octx.fillStyle=grd;octx.fill();
+    octx.fillStyle=col+'22';octx.strokeStyle=col;octx.lineWidth=isHov?2.2:1.5;
+    if(u.branch==='LAND'){octx.fillRect(s.x-sz,s.y-sz,sz*2,sz*2);octx.strokeRect(s.x-sz,s.y-sz,sz*2,sz*2);}
+    else if(u.branch==='NAVY'){octx.beginPath();octx.arc(s.x,s.y,sz,0,Math.PI*2);octx.fill();octx.stroke();}
+    else{octx.beginPath();octx.moveTo(s.x,s.y-sz*1.2);octx.lineTo(s.x+sz,s.y+sz*0.8);octx.lineTo(s.x-sz,s.y+sz*0.8);octx.closePath();octx.fill();octx.stroke();}
+    const sc={SURGE:'#ef4444',ELEVATED:'#f59e0b'}[u.status]||'#22c55e';octx.fillStyle=sc;octx.beginPath();octx.arc(s.x+sz*0.8,s.y-sz*0.8,2.5,0,Math.PI*2);octx.fill();
+    if(zoom>=4||isHov){const lbl=u.name.split('—').pop().trim().slice(0,18);octx.font='10px Share Tech Mono';octx.textAlign='left';const lw=octx.measureText(lbl).width;octx.fillStyle='rgba(2,8,18,0.85)';octx.fillRect(s.x+sz+2,s.y-8,lw+5,12);octx.fillStyle=col;octx.fillText(lbl,s.x+sz+5,s.y+1);}
+    octx.restore();
+  }
+  octx.textAlign='left';
+}
+function milUnitAt(mx,my){for(const u of MIL_UNITS){const s=ll2s(u.lat,u.lon);if(Math.hypot(s.x-mx,s.y-my)<14)return u;}return null;}
+
+// ═══════════════════════════════════════
+// FREE API ENGINES — ALL DATA SOURCES
+// ═══════════════════════════════════════
+
+// ── PROXY DETECTION ─────────────────────────────────────────────────────
+// Auto-detects local MAXIMUS proxy server (node server.js).
+// If proxy is running → real data. If not → allorigins CORS fallback.
+const PROXY_URL  = 'http://localhost:3001';
+const CORS_PROXY = 'https://api.allorigins.win/get?url=';
+let   PROXY_ONLINE   = false;
+let   PROXY_KEY_STATUS = {};
+
+async function detectProxy(retries=5, delay=1000){
+  for(let i=0;i<retries;i++){
+    try{
+      const r = await fetch(`${PROXY_URL}/api/status`,{signal:AbortSignal.timeout(2000)});
+      if(r.ok){
+        const d = await r.json();
+        PROXY_ONLINE     = true;
+        PROXY_KEY_STATUS = d.keys || {};
+        const el=document.getElementById('proxy-badge');
+        if(el){el.textContent='PROXY LIVE';el.style.color='#22c55e';el.style.borderColor='#22c55e44';el.style.background='#22c55e11';}
+        console.log('[MAXIMUS] Local proxy connected — real data mode active');
+        return true;
+      }
+    }catch(e){
+      if(i<retries-1){await new Promise(r=>setTimeout(r,delay));delay=Math.min(delay*1.5,5000);}
+    }
+  }
+  PROXY_ONLINE=false;
+  const el=document.getElementById('proxy-badge');
+  if(el){el.textContent='PROXY OFF';el.style.color='#f59e0b';el.style.borderColor='#f59e0b44';el.style.background='#f59e0b11';}
+  console.log('[MAXIMUS] No local proxy — using CORS fallback (SIM data)');
+  return false;
+}
+
+// Probe proxy every 30s so badge updates if user starts server mid-session
+setInterval(detectProxy, 30000);
+
+// Direct proxy fetch — for endpoints local server exposes
+async function proxyFetch(path){
+  const r=await fetch(`${PROXY_URL}${path}`,{signal:AbortSignal.timeout(8000)});
+  if(!r.ok)throw new Error(`Proxy ${path} → HTTP ${r.status}`);
+  return r.json();
+}
+
+// CORS fallback — when proxy is offline
+function corsFetch(url){
+  return fetch(CORS_PROXY+encodeURIComponent(url))
+    .then(r=>r.json())
+    .then(d=>{try{return JSON.parse(d.contents);}catch{return d.contents;}});
+}
+
+// ── 1. ACLED — Armed Conflict Location & Event Data ───────────────────
+let acledData=[];
+let acledTimer=null;
+async function fetchACLED(){
+  setLayerApiStatus('acled','fetch');
+  try{
+    if(PROXY_ONLINE && PROXY_KEY_STATUS.acled){
+      // Real ACLED data via local proxy
+      const d=await proxyFetch('/api/acled?days=30&limit=100');
+      if(Array.isArray(d)&&d.length){acledData=d;setLayerApiStatus('acled','live');}
+      else{acledData=ACLED_FALLBACK;setLayerApiStatus('acled','sim');}
+    } else {
+      // CORS fallback — GDELT conflict events as ACLED proxy
+      const url=`https://api.gdeltproject.org/api/v2/events/query?query=conflict&mode=artlist&maxrecords=50&format=json&timespan=24h`;
+      const d=await corsFetch(url);
+      if(d&&d.articles){
+        acledData=d.articles.filter(a=>a.latitude&&a.longitude).slice(0,40).map((a,i)=>({
+          id:'AC'+i,lat:parseFloat(a.latitude),lon:parseFloat(a.longitude),
+          type:a.category||'Conflict',fatalities:0,
+          event_date:a.seendate?a.seendate.slice(0,8):'',
+          notes:a.title||''
+        }));
+        setLayerApiStatus('acled', acledData.length?'live':'sim');
+      }else{acledData=ACLED_FALLBACK;setLayerApiStatus('acled','sim');}
+    }
+  }catch{acledData=ACLED_FALLBACK;setLayerApiStatus('acled','sim');}
+  markDirty();
+}
+const ACLED_FALLBACK=[
+  {id:'AC1',lat:48.2,lon:37.5,type:'Battles',fatalities:12,event_date:'2024',notes:'Ukraine — active armored contact Donetsk'},
+  {id:'AC2',lat:31.5,lon:34.5,type:'Explosions',fatalities:0,event_date:'2024',notes:'Gaza — IDF air strike northern sector'},
+  {id:'AC3',lat:15.6,lon:32.5,type:'Violence',fatalities:8,event_date:'2024',notes:'Sudan — RSF Khartoum siege continues'},
+  {id:'AC4',lat:13.5,lon:2.1,type:'Battles',fatalities:6,event_date:'2024',notes:'Mali — JNIM ambush Ménaka corridor'},
+  {id:'AC5',lat:9.1,lon:7.5,type:'Explosions',fatalities:3,event_date:'2024',notes:'Nigeria — Boko Haram IED northeast'},
+  {id:'AC6',lat:12.4,lon:43.5,type:'Violence',fatalities:2,event_date:'2024',notes:'Djibouti strait — Houthi drone intercept'},
+  {id:'AC7',lat:34.5,lon:69.2,type:'Violence',fatalities:5,event_date:'2024',notes:'Afghanistan — Taliban-IS clash Kabul'},
+  {id:'AC8',lat:17.0,lon:100.0,type:'Riots',fatalities:0,event_date:'2024',notes:'Myanmar — junta airstrike Sagaing'},
+];
+function startACLED(){fetchACLED();acledTimer=setInterval(fetchACLED,300000);}
+function drawACLEDLayer(){
+  const t=Date.now()/1000;
+  for(const e of acledData){
+    if(!e.lat||!e.lon)continue;
+    const s=ll2s(e.lat,e.lon);if(s.x<-20||s.x>ovC.width+20||s.y<-20||s.y>ovC.height+20)continue;
+    const col='#f97316';
+    const pulse=Math.sin(t*2+e.lat)*0.3+0.7;
+    octx.save();
+    octx.globalAlpha=0.7*pulse;
+    octx.strokeStyle=col;octx.lineWidth=1;
+    octx.beginPath();octx.arc(s.x,s.y,7,0,Math.PI*2);octx.stroke();
+    octx.globalAlpha=0.5;
+    const grd=octx.createRadialGradient(s.x,s.y,0,s.x,s.y,10);
+    grd.addColorStop(0,col+'55');grd.addColorStop(1,col+'00');
+    octx.beginPath();octx.arc(s.x,s.y,10,0,Math.PI*2);octx.fillStyle=grd;octx.fill();
+    octx.globalAlpha=0.9;
+    octx.fillStyle=col;octx.font='9px Share Tech Mono';
+    octx.textAlign='center';octx.textBaseline='middle';
+    octx.fillText('✕',s.x,s.y);
+    if(zoom>=4){
+      const lbl=(e.notes||e.type).slice(0,22);
+      octx.font='9px Share Tech Mono';octx.textAlign='left';
+      const lw=octx.measureText(lbl).width;
+      octx.fillStyle='rgba(2,8,18,0.85)';octx.fillRect(s.x+8,s.y-7,lw+5,11);
+      octx.fillStyle=col;octx.textBaseline='middle';octx.fillText(lbl,s.x+10,s.y);
+    }
+    octx.restore();
+  }
+  octx.textAlign='left';octx.textBaseline='alphabetic';
+}
+
+// ── 2. NASA FIRMS — Fire/Thermal Anomaly ───────────────────────────────
+let firmsData=[];
+let firmsTimer=null;
+async function fetchFIRMS(){
+  setLayerApiStatus('firms','fetch');
+  try{
+    if(PROXY_ONLINE && PROXY_KEY_STATUS.firms){
+      // Real FIRMS VIIRS NRT via local proxy (higher resolution, better coverage)
+      const d=await proxyFetch('/api/firms?source=VIIRS_SNPP_NRT&days=1');
+      if(Array.isArray(d)&&d.length){firmsData=d;setLayerApiStatus('firms','live');}
+      else{firmsData=[];setLayerApiStatus('firms','sim');}
+    } else {
+      // CORS fallback — MODIS public CSV (no key required but may be blocked)
+      const url='https://firms.modaps.eosdis.nasa.gov/data/active_fire/modis-c6.1/csv/MODIS_C6_1_Global_24h.csv';
+      const txt=await corsFetch(url);
+      const raw=typeof txt==='string'?txt:(txt?.contents||'');
+      const lines=raw.split('\n').slice(1).filter(Boolean);
+      firmsData=lines.slice(0,500).map(l=>{
+        const c=l.split(',');
+        return{lat:parseFloat(c[0]),lon:parseFloat(c[1]),brightness:parseFloat(c[2]),confidence:c[8]||'n',frp:parseFloat(c[12])||0};
+      }).filter(f=>!isNaN(f.lat)&&!isNaN(f.lon)&&f.brightness>300);
+      setLayerApiStatus('firms',firmsData.length?'live':'sim');
+    }
+  }catch{firmsData=[];setLayerApiStatus('firms','sim');}
+  markDirty();
+}
+function startFIRMS(){fetchFIRMS();firmsTimer=setInterval(fetchFIRMS,600000);}
+function drawFIRMSLayer(){
+  if(!firmsData.length)return;
+  octx.save();
+  for(const f of firmsData){
+    const s=ll2s(f.lat,f.lon);if(s.x<-10||s.x>ovC.width+10||s.y<-10||s.y>ovC.height+10)continue;
+    const intensity=Math.min(1,(f.brightness-300)/200);
+    const r=Math.round(255);const g=Math.round(80+intensity*80);const b=0;
+    const sz=2+intensity*4;
+    octx.globalAlpha=0.65+intensity*0.25;
+    octx.fillStyle=`rgb(${r},${g},${b})`;
+    octx.beginPath();octx.arc(s.x,s.y,sz,0,Math.PI*2);octx.fill();
+  }
+  octx.restore();
+}
+
+// ── 3. GDELT — Global Event Database ──────────────────────────────────
+let gdeltData=[];
+let gdeltTimer=null;
+async function fetchGDELT(){
+  setLayerApiStatus('gdelt','fetch');
+  try{
+    if(PROXY_ONLINE){
+      // Direct GDELT via proxy — no CORS issues, better reliability
+      const d=await proxyFetch('/api/gdelt?query=conflict+war+attack&hours=24&limit=60');
+      if(Array.isArray(d)&&d.length){
+        gdeltData=d.map((a,i)=>({id:'GD'+i,lat:a.lat,lon:a.lon,title:a.title,tone:a.tone,url:a.url,src:a.src}));
+        setLayerApiStatus('gdelt','live');
+      }else{gdeltData=[];setLayerApiStatus('gdelt','sim');}
+    } else {
+      const url='https://api.gdeltproject.org/api/v2/events/query?query=sourcelang:eng&mode=artlist&maxrecords=40&format=json&timespan=24h';
+      const d=await corsFetch(url);
+      if(d&&d.articles){
+        gdeltData=d.articles.filter(a=>a.latitude&&a.longitude).slice(0,30).map((a,i)=>({
+          id:'GD'+i,lat:+a.latitude,lon:+a.longitude,
+          title:a.title||(a.url||'').split('/').pop().replace(/-/g,' ').slice(0,60),
+          tone:parseFloat(a.tone||0),url:a.url,src:a.domain
+        }));
+        setLayerApiStatus('gdelt',gdeltData.length?'live':'sim');
+      }else{gdeltData=[];setLayerApiStatus('gdelt','sim');}
+    }
+  }catch{gdeltData=[];setLayerApiStatus('gdelt','sim');}
+  markDirty();
+}
+function startGDELT(){fetchGDELT();gdeltTimer=setInterval(fetchGDELT,180000);}
+function drawGDELTLayer(){
+  for(const e of gdeltData){
+    const s=ll2s(e.lat,e.lon);if(s.x<-15||s.x>ovC.width+15||s.y<-15||s.y>ovC.height+15)continue;
+    const neg=e.tone<0;const col=neg?'#8b5cf6':'#06b6d4';
+    octx.save();octx.globalAlpha=0.6;
+    octx.strokeStyle=col;octx.lineWidth=1;
+    octx.beginPath();octx.arc(s.x,s.y,4,0,Math.PI*2);octx.stroke();
+    octx.globalAlpha=0.3;octx.fillStyle=col;
+    octx.beginPath();octx.arc(s.x,s.y,4,0,Math.PI*2);octx.fill();
+    octx.restore();
+  }
+}
+
+// ── 4. AlienVault OTX — Cyber Threat Intelligence ─────────────────────
+let otxData=[];
+let otxTimer=null;
+async function fetchOTX(){
+  setLayerApiStatus('otx','fetch');
+  try{
+    if(PROXY_ONLINE && PROXY_KEY_STATUS.otx){
+      // Real OTX authenticated feed via proxy
+      const d=await proxyFetch('/api/otx?limit=20');
+      if(Array.isArray(d)&&d.length){
+        otxData=d.map((p,i)=>({
+          id:'OT'+i,title:p.name,modified:p.modified,
+          ioc_count:p.ioc_count||0,tlp:p.tlp||'white',
+          tags:p.tags||[],targeted_countries:p.targeted_countries||[],
+          adversary:p.adversary||''
+        }));
+        setLayerApiStatus('otx','live');
+      }else{otxData=OTX_FALLBACK;setLayerApiStatus('otx','sim');}
+    } else {
+      // OTX requires auth — use fallback
+      otxData=OTX_FALLBACK;setLayerApiStatus('otx','sim');
+    }
+  }catch{otxData=OTX_FALLBACK;setLayerApiStatus('otx','sim');}
+  if(otxData.length&&activeLeftTab==='osint')buildLeftContent();
+  markDirty();
+}
+const OTX_FALLBACK=[
+  {id:'OT1',title:'APT41 — ASEAN Financial Sector Campaign',ioc_count:142,tlp:'green',tags:['APT41','China','banking','ASEAN']},
+  {id:'OT2',title:'Turla Snake Implant — EU Government Targets',ioc_count:87,tlp:'green',tags:['Turla','Russia','government','espionage']},
+  {id:'OT3',title:'Lazarus Group — Crypto Exchange Heist',ioc_count:230,tlp:'white',tags:['Lazarus','DPRK','crypto','financial']},
+  {id:'OT4',title:'FIN7 — POS Malware Hospitality Sector',ioc_count:65,tlp:'white',tags:['FIN7','eCrime','retail']},
+];
+// OTX markers — shown as geo nodes on threat actor countries
+const OTX_GEO={Russia:[55.75,37.6],China:[39.9,116.4],DPRK:[39.0,125.8],Iran:[35.7,51.4],US:[38.9,-77.0]};
+function startOTX(){fetchOTX();otxTimer=setInterval(fetchOTX,600000);}
+function drawOTXLayer(){
+  const t=Date.now()/1000;
+  const cols=['#ef4444','#f59e0b','#8b5cf6','#06b6d4'];
+  otxData.slice(0,6).forEach((p,i)=>{
+    // Pick a threat actor geo if tags match
+    let coords=null;
+    for(const[actor,ll] of Object.entries(OTX_GEO)){
+      if(p.tags&&p.tags.some(t=>t.toLowerCase().includes(actor.toLowerCase()))){coords=ll;break;}
+    }
+    if(!coords)return;
+    const s=ll2s(coords[0],coords[1]);if(s.x<-20||s.x>ovC.width+20||s.y<-20||s.y>ovC.height+20)return;
+    const col=cols[i%cols.length];
+    const pulse=Math.sin(t*1.5+i)*0.4+0.6;
+    octx.save();octx.globalAlpha=0.8*pulse;
+    octx.strokeStyle=col;octx.lineWidth=1.5;
+    octx.setLineDash([3,3]);
+    octx.beginPath();octx.arc(s.x,s.y,9+pulse*3,0,Math.PI*2);octx.stroke();
+    octx.setLineDash([]);
+    octx.globalAlpha=0.9;
+    octx.fillStyle=col;octx.font='bold 10px Share Tech Mono';
+    octx.textAlign='center';octx.textBaseline='middle';
+    octx.fillText('⚡',s.x,s.y);
+    octx.restore();
+  });
+  octx.textAlign='left';octx.textBaseline='alphabetic';
+}
+
+// ── 5. CISA KEV — Known Exploited Vulnerabilities ─────────────────────
+let cisaData=[];
+let cisaTimer=null;
+async function fetchCISA(){
+  setLayerApiStatus('cisa','fetch');
+  try{
+    let d=null;
+    if(PROXY_ONLINE){
+      // Via proxy — direct fetch, no CORS issues
+      d=await proxyFetch('/api/cisa');
+      if(d&&d.recent){
+        cisaData=d.all||[];
+        setLayerApiStatus('cisa','live');
+        if(d.recent.length)addAlert('high',`CISA KEV: ${d.recent.length} new exploited CVE(s) added past 30d — latest: ${d.recent[0].cveID}`,true);
+      }else{setLayerApiStatus('cisa','sim');}
+    } else {
+      const url='https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
+      d=await corsFetch(url);
+      if(d&&d.vulnerabilities){
+        cisaData=d.vulnerabilities.slice(0,20);
+        setLayerApiStatus('cisa','live');
+        const recent=cisaData.filter(v=>Date.now()-new Date(v.dateAdded||'2020-01-01').getTime()<7*86400000);
+        if(recent.length)addAlert('high',`CISA KEV: ${recent.length} new exploited CVE(s) added past 7d — latest: ${recent[0].cveID}`,true);
+      }else{setLayerApiStatus('cisa','sim');}
+    }
+  }catch{setLayerApiStatus('cisa','sim');}
+  markDirty();
+}
+function startCISA(){fetchCISA();cisaTimer=setInterval(fetchCISA,3600000);}
+// CISA drawn as alert panel entries, not map markers
+function drawCISALayer(){/* CISA feeds alert panel, not canvas */}
+
+// ── 6. ReliefWeb — UN Humanitarian ────────────────────────────────────
+let reliefwebData=[];
+let reliefwebTimer=null;
+async function fetchReliefWeb(){
+  setLayerApiStatus('reliefweb','fetch');
+  try{
+    if(PROXY_ONLINE){
+      const d=await proxyFetch('/api/reliefweb?type=disasters&limit=20');
+      if(Array.isArray(d)&&d.length){reliefwebData=d;setLayerApiStatus('reliefweb','live');}
+      else{reliefwebData=[];setLayerApiStatus('reliefweb','sim');}
+    } else {
+      const url='https://api.reliefweb.int/v1/disasters?appname=maximus&limit=20&sort[]=date.created:desc&fields[include][]=name&fields[include][]=country&fields[include][]=type&fields[include][]=date';
+      const d=await corsFetch(url);
+      if(d&&d.data){
+        reliefwebData=d.data.map(e=>({
+          id:'RW'+e.id,name:e.fields.name,
+          country:(e.fields.country||[]).map(c=>c.name).join(', '),
+          type:(e.fields.type||[]).map(t=>t.name).join(', '),
+          date:e.fields.date?.created?.slice(0,10)||''
+        }));
+        setLayerApiStatus('reliefweb',reliefwebData.length?'live':'sim');
+      }else{reliefwebData=[];setLayerApiStatus('reliefweb','sim');}
+    }
+  }catch{reliefwebData=[];setLayerApiStatus('reliefweb','sim');}
+  markDirty();
+}
+function startReliefWeb(){fetchReliefWeb();reliefwebTimer=setInterval(fetchReliefWeb,1800000);}
+// ReliefWeb feeds the left panel events list under HUM category
+function drawReliefWebLayer(){/* Feeds left panel, not canvas markers */}
+
+// ── 7. NOAA NWS — Weather ─────────────────────────────────────────────
+let weatherData=[];
+let weatherTimer=null;
+// Key observation stations for tactical relevance
+const WX_STATIONS=[
+  {id:'KDCA',name:'Washington DC',lat:38.85,lon:-77.04},
+  {id:'KGSO',name:'Norfolk VA',lat:36.89,lon:-76.01},
+  {id:'KJFK',name:'New York',lat:40.64,lon:-73.78},
+  {id:'KIAD',name:'Dulles',lat:38.95,lon:-77.46},
+  {id:'RJTY',name:'Yokota AB',lat:35.75,lon:139.35},
+  {id:'PGUA',name:'Andersen Guam',lat:13.58,lon:144.93},
+  {id:'OMDB',name:'Dubai/CENTCOM',lat:25.25,lon:55.36},
+  {id:'LTAC',name:'Ankara',lat:40.13,lon:32.99},
+  {id:'UUWW',name:'Moscow',lat:55.59,lon:37.27},
+  {id:'ZBTJ',name:'Tianjin/China',lat:39.12,lon:117.35},
+];
+async function fetchWeather(){
+  setLayerApiStatus('weather','fetch');
+  let liveCount=0;
+  for(const st of WX_STATIONS){
+    try{
+      let obs=null;
+      if(PROXY_ONLINE && st.id.startsWith('K')){
+        // US NWS stations via proxy
+        obs=await proxyFetch(`/api/weather/nws/${st.id}`);
+      } else if(PROXY_ONLINE && PROXY_KEY_STATUS.owm && !st.id.startsWith('K')){
+        // International stations via OWM proxy
+        obs=await proxyFetch(`/api/weather/owm?lat=${st.lat}&lon=${st.lon}&name=${encodeURIComponent(st.name)}`);
+        if(obs){obs.temp=obs.temp_f?Math.round(obs.temp_f)+'°F':null;obs.wind=obs.wind_kts?Math.round(obs.wind_kts)+'kts':null;}
+      } else {
+        // Direct NWS (CONUS only, may be CORS-blocked for OCONUS)
+        const d=await fetch(`https://api.weather.gov/stations/${st.id}/observations/latest`,{headers:{Accept:'application/geo+json'}}).then(r=>r.json()).catch(()=>null);
+        if(d&&d.properties){
+          const p=d.properties;
+          obs={temp_f:p.temperature?.value!=null?Math.round(p.temperature.value*9/5+32):null,wind_kts:p.windSpeed?.value!=null?Math.round(p.windSpeed.value*0.54):null,sky:p.textDescription||''};
+          obs.temp=obs.temp_f?obs.temp_f+'°F':null;obs.wind=obs.wind_kts?obs.wind_kts+'kts':null;
+        }
+      }
+      if(obs&&(obs.temp||obs.temp_f)){
+        st.temp=obs.temp_f?Math.round(obs.temp_f)+'°F':(obs.temp||null);
+        st.wind=obs.wind_kts?Math.round(obs.wind_kts)+'kts':(obs.wind||null);
+        st.sky=obs.sky||'';
+        liveCount++;
+      }
+    }catch{}
+  }
+  setLayerApiStatus('weather',liveCount>3?'live':'sim');
+  markDirty();
+}
+function startWeather(){fetchWeather();weatherTimer=setInterval(fetchWeather,900000);}
+function drawWeatherLayer(){
+  octx.save();
+  for(const st of WX_STATIONS){
+    if(!st.temp)continue;
+    const s=ll2s(st.lat,st.lon);if(s.x<-30||s.x>ovC.width+30||s.y<-30||s.y>ovC.height+30)continue;
+    octx.globalAlpha=0.85;
+    octx.strokeStyle='#7dd3fc';octx.lineWidth=1;
+    octx.beginPath();octx.arc(s.x,s.y,4,0,Math.PI*2);octx.stroke();
+    octx.fillStyle='rgba(2,10,24,0.85)';
+    octx.fillRect(s.x+6,s.y-10,54,22);
+    octx.fillStyle='#7dd3fc';octx.font='9px Share Tech Mono';
+    octx.textAlign='left';octx.textBaseline='top';
+    octx.fillText(st.temp||'—',s.x+8,s.y-9);
+    if(st.wind){octx.fillStyle='#94a3b8';octx.font='8px Share Tech Mono';octx.fillText(st.wind,s.x+8,s.y+1);}
+  }
+  octx.restore();
+  octx.textAlign='left';octx.textBaseline='alphabetic';
+}
+
+// ── 8. FRED — Federal Reserve Economic Data ────────────────────────────
+let fredData={};
+let fredTimer=null;
+const FRED_SERIES=[
+  {id:'DFF',name:'Fed Funds Rate'},
+  {id:'T10YIE',name:'10yr Breakeven Inflation'},
+  {id:'DCOILWTICO',name:'WTI Crude Oil'},
+  {id:'DEXUSEU',name:'USD/EUR'},
+  {id:'USEPUINDXM',name:'Economic Policy Uncertainty'},
+];
+async function fetchFRED(){
+  setLayerApiStatus('fred','fetch');
+  let liveCount=0;
+  if(PROXY_ONLINE && PROXY_KEY_STATUS.fred){
+    try{
+      const d=await proxyFetch('/api/fred');
+      if(Array.isArray(d)&&d.length){
+        d.forEach(s=>{if(s.value!=null){fredData[s.id]={value:s.value,date:s.date,name:s.name,unit:s.unit,change:s.change};liveCount++;}});
+        setLayerApiStatus('fred',liveCount>0?'live':'sim');
+      }else{setLayerApiStatus('fred','sim');}
+    }catch{setLayerApiStatus('fred','sim');}
+  } else {
+    // CORS fallback — direct FRED CSV (no key, often blocked)
+    for(const s of FRED_SERIES){
+      try{
+        const url=`https://fred.stlouisfed.org/graph/fredgraph.csv?id=${s.id}`;
+        const txt=await corsFetch(url);
+        if(typeof txt==='string'){
+          const lines=txt.trim().split('\n').filter(Boolean);
+          const last=lines[lines.length-1];
+          const parts=last.split(',');
+          if(parts[1]&&parts[1]!=='.'){fredData[s.id]={value:parseFloat(parts[1]),date:parts[0],name:s.name};liveCount++;}
+        }
+      }catch{}
+    }
+    setLayerApiStatus('fred',liveCount>0?'live':'sim');
+  }
+  if(activeLeftTab==='legend')buildLeftContent();
+  markDirty();
+}
+function startFRED(){fetchFRED();fredTimer=setInterval(fetchFRED,3600000);}
+// FRED shown in legend/panel, not map markers
+function drawFREDLayer(){/* Feeds economic panel */}
+
+// ── 9. FAA NOTAM ───────────────────────────────────────────────────────
+let notamData=[];
+let notamTimer=null;
+const NOTAM_ZONES=[
+  // Key military and airspace restriction zones (simulated positions for key areas)
+  {id:'N01',name:'R-4808 White Sands',lat:32.98,lon:-106.36,radius:80,type:'R',active:true},
+  {id:'N02',name:'W-386 Atlantic Test',lat:34.5,lon:-74.5,radius:100,type:'W',active:true},
+  {id:'N03',name:'P-56 DC SFRA',lat:38.87,lon:-77.04,radius:15,type:'P',active:true},
+  {id:'N04',name:'R-6006 Eglin Range',lat:30.25,lon:-86.8,radius:55,type:'R',active:true},
+  {id:'N05',name:'MOA — Barry M Goldwater',lat:32.5,lon:-113.5,radius:70,type:'MOA',active:true},
+  {id:'N06',name:'R-2508 Edwards',lat:34.95,lon:-117.5,radius:90,type:'R',active:true},
+  {id:'N07',name:'Nellis MOA Complex',lat:37.5,lon:-115.0,radius:120,type:'MOA',active:true},
+  {id:'N08',name:'R-4 Pearl Harbor',lat:21.3,lon:-157.8,radius:20,type:'R',active:true},
+];
+async function fetchNOTAM(){
+  setLayerApiStatus('notam','fetch');
+  // FAA NOTAM API is authenticated — use known static military airspace zones
+  notamData=NOTAM_ZONES;
+  setLayerApiStatus('notam','sim');
+  markDirty();
+}
+function startNOTAM(){fetchNOTAM();}
+const NOTAM_COLS={R:'#ef4444',W:'#f59e0b',P:'#8b5cf6',MOA:'#22c55e'};
+function drawNOTAMLayer(){
+  const t=Date.now()/1000;
+  for(const z of notamData){
+    if(!z.active)continue;
+    const s=ll2s(z.lat,z.lon);if(s.x<-200||s.x>ovC.width+200||s.y<-200||s.y>ovC.height+200)continue;
+    const col=NOTAM_COLS[z.type]||'#94a3b8';
+    // Convert nm radius to pixels (approximate)
+    const pxPerDeg=ovC.width/(360/(1<<zoom));
+    const pxRadius=Math.max(8,(z.radius/60)*pxPerDeg);
+    octx.save();
+    octx.globalAlpha=0.12;
+    octx.fillStyle=col;
+    octx.beginPath();octx.arc(s.x,s.y,pxRadius,0,Math.PI*2);octx.fill();
+    octx.globalAlpha=0.4;
+    octx.strokeStyle=col;octx.lineWidth=1;
+    octx.setLineDash([4,4]);
+    octx.beginPath();octx.arc(s.x,s.y,pxRadius,0,Math.PI*2);octx.stroke();
+    octx.setLineDash([]);
+    if(pxRadius>12||zoom>=4){
+      octx.globalAlpha=0.8;
+      octx.fillStyle=col;octx.font='8px Share Tech Mono';
+      octx.textAlign='center';octx.textBaseline='middle';
+      octx.fillText(z.type,s.x,s.y);
+      if(zoom>=4){octx.font='8px Share Tech Mono';octx.fillText(z.name,s.x,s.y+12);}
+    }
+    octx.restore();
+  }
+  octx.textAlign='left';octx.textBaseline='alphabetic';
+}
+
+// ── 10. AIS — Live Vessel Tracking ────────────────────────────────────
+let aisData=[];
+let aisTimer=null;
+async function fetchAIS(){
+  setLayerApiStatus('ais','fetch');
+  try{
+    if(PROXY_ONLINE && PROXY_KEY_STATUS.ais){
+      // Real AISHub via proxy with credentials
+      const d=await proxyFetch('/api/ais');
+      if(Array.isArray(d)&&d.length){
+        aisData=d.filter(v=>v.lat&&v.lon);
+        setLayerApiStatus('ais','live');
+      }else{aisData=AIS_FALLBACK;setLayerApiStatus('ais','sim');}
+    } else {
+      // AISHub requires auth — fallback to static chokepoint data
+      aisData=AIS_FALLBACK;
+      setLayerApiStatus('ais','sim');
+    }
+  }catch{aisData=AIS_FALLBACK;setLayerApiStatus('ais','sim');}
+  markDirty();
+}
+const AIS_FALLBACK=[
+  {mmsi:'123456001',lat:25.5,lon:56.5,name:'PERSIAN CARRIER',type:80,speed:12,course:315,destination:'DUBAI'},
+  {mmsi:'123456002',lat:12.5,lon:43.5,name:'RED SEA TANKER 1',type:80,speed:8,course:180,destination:'ADEN'},
+  {mmsi:'123456003',lat:1.3,lon:103.8,name:'SINGAPORE FREIGHT',type:70,speed:14,course:90,destination:'HONG KONG'},
+  {mmsi:'123456004',lat:35.5,lon:140.0,name:'PACIFIC BULK',type:70,speed:10,course:45,destination:'YOKOHAMA'},
+  {mmsi:'123456005',lat:51.5,lon:1.5,name:'NORTH SEA TANKER',type:80,speed:12,course:270,destination:'ROTTERDAM'},
+  {mmsi:'123456006',lat:36.0,lon:-6.0,name:'GIBRALTAR PASS',type:70,speed:16,course:90,destination:'ALGECIRAS'},
+  {mmsi:'123456007',lat:8.0,lon:-13.0,name:'WEST AFRICA CARGO',type:70,speed:9,course:180,destination:'DAKAR'},
+  {mmsi:'123456008',lat:-34.0,lon:18.5,name:'CAPE HOPE BULKER',type:70,speed:11,course:45,destination:'CAPE TOWN'},
+];
+function getVesselColor(type){
+  if(type>=80&&type<=89)return'#f59e0b'; // tanker
+  if(type>=70&&type<=79)return'#3b82f6'; // cargo
+  if(type>=60&&type<=69)return'#22c55e'; // passenger
+  if(type>=30&&type<=39)return'#06b6d4'; // fishing
+  if(type===55||type===35)return'#ef4444'; // military/law enforce
+  return'#94a3b8';
+}
+function startAISTracking(){fetchAIS();aisTimer=setInterval(fetchAIS,120000);}
+function stopAISTracking(){if(aisTimer)clearInterval(aisTimer);aisTimer=null;aisData=[];}
+function drawAISLayer(){
+  for(const v of aisData){
+    const s=ll2s(v.lat,v.lon);if(s.x<-10||s.x>ovC.width+10||s.y<-10||s.y>ovC.height+10)continue;
+    const col=getVesselColor(v.type);
+    const angle=(v.course||0)*Math.PI/180;
+    octx.save();octx.globalAlpha=0.8;
+    octx.translate(s.x,s.y);octx.rotate(angle);
+    octx.fillStyle=col+'33';octx.strokeStyle=col;octx.lineWidth=1;
+    octx.beginPath();
+    octx.moveTo(0,-5);octx.lineTo(3,4);octx.lineTo(0,2);octx.lineTo(-3,4);octx.closePath();
+    octx.fill();octx.stroke();
+    octx.restore();
+    if(zoom>=5){
+      octx.save();octx.globalAlpha=0.7;
+      octx.font='8px Share Tech Mono';octx.fillStyle=col;
+      octx.textAlign='left';octx.fillText(v.name.slice(0,12),s.x+7,s.y+3);
+      octx.restore();
+    }
+  }
+}
+
+// ── MASTER INIT — All APIs ─────────────────────────────────────────────
+function startAllAPIs(){
+  startFlightTracking();
+  startACLED();
+  startFIRMS();
+  startGDELT();
+  startOTX();
+  startCISA();
+  startReliefWeb();
+  startWeather();
+  startFRED();
+  startNOTAM();
+  startAISTracking();
+}
+
+// ── HIT DETECTION for AIS ──────────────────────────────────────────────
+function aisAt(mx,my){
+  let best=null,bd=Infinity;
+  for(const v of aisData){
+    const s=ll2s(v.lat,v.lon);
+    const d=Math.hypot(s.x-mx,s.y-my);
+    if(d<10&&d<bd){bd=d;best=v;}
+  }
+  return best;
+}
+
+// ── FRED MACRO PANEL ───────────────────────────────────────────────────
+function buildFREDPanel(){
+  if(!Object.keys(fredData).length)return`<div style="color:#374151;font-size:10px;padding:8px">Fetching FRED macro data…</div>`;
+  return Object.values(fredData).map(s=>`
+    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0a1628;font-size:11px">
+      <span style="color:#94a3b8">${s.name}</span>
+      <span style="color:#22c55e;font-family:Orbitron,monospace;font-weight:700">${s.value.toFixed(2)}</span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════
+// FLIGHT ENGINE
+// ═══════════════════════════════════════
+let aircraft=new Map();let flightFetchTimer=null;let flightCount=0,milCount=0;
+const TRAIL_MAX=8;const FLIGHT_REFRESH=15000;
+const MIL_PREFIXES=['RCH','REACH','IRON','JAKE','POLO','SPAR','VENUS','NODAK','DUKE','BUCK','USAF','NAVY','ARMY','RIFLE','HAWK','EAGLE','GHOST','SHADOW','REAPER'];
+function isMilICAO(h){const n=parseInt(h,16);return n>=0xAE0000&&n<=0xAFFFFF;}
+function isMilCS(cs){if(!cs)return false;const u=cs.trim().toUpperCase();return MIL_PREFIXES.some(p=>u.startsWith(p));}
+const SIM_ROUTES=[
+  {cs:'UAL890',from:[40.6,-73.8],to:[51.5,-0.1],alt:11000,vel:480,isMil:false},
+  {cs:'BAW178',from:[51.5,-0.1],to:[40.7,-74.0],alt:10500,vel:460,isMil:false},
+  {cs:'AFR006',from:[48.9,2.3],to:[25.8,-80.3],alt:11200,vel:470,isMil:false},
+  {cs:'UAL837',from:[37.6,-122.4],to:[35.7,139.7],alt:11500,vel:490,isMil:false},
+  {cs:'JAL006',from:[35.7,139.7],to:[37.6,-122.4],alt:11300,vel:485,isMil:false},
+  {cs:'EK001',from:[25.3,55.4],to:[51.5,-0.1],alt:11000,vel:475,isMil:false},
+  {cs:'QTR002',from:[25.3,51.6],to:[40.6,-73.8],alt:11200,vel:472,isMil:false},
+  {cs:'CCA101',from:[39.9,116.4],to:[1.4,103.8],alt:10500,vel:450,isMil:false},
+  {cs:'SIA211',from:[1.4,103.8],to:[25.3,55.4],alt:10800,vel:460,isMil:false},
+  {cs:'SWA1234',from:[33.9,-118.4],to:[40.6,-73.8],alt:10000,vel:430,isMil:false},
+  {cs:'RCH102',from:[38.8,-77.0],to:[50.8,-1.8],alt:9000,vel:420,isMil:true},
+  {cs:'REACH701',from:[37.6,-122.4],to:[35.7,139.7],alt:9500,vel:440,isMil:true},
+  {cs:'SPAR19',from:[51.5,-0.1],to:[38.8,-77.0],alt:12000,vel:500,isMil:true},
+  {cs:'IRON55',from:[38.8,-77.0],to:[41.0,28.8],alt:8500,vel:410,isMil:true},
+  {cs:'JAKE11',from:[28.4,-80.6],to:[25.3,55.4],alt:11000,vel:460,isMil:true},
+];
+const simState=new Map();
+function simInterp(r,t){const[la1,lo1]=r.from,[la2,lo2]=r.to;const lat=la1+(la2-la1)*t,lon=lo1+(lo2-lo1)*t;return{lat,lon,heading:(Math.atan2(lo2-lo1,la2-la1)*180/Math.PI+360)%360};}
+function seedSim(){const now=Date.now();SIM_ROUTES.forEach(r=>{const prog=Math.random();simState.set(r.cs,{prog,dir:1});const{lat,lon,heading}=simInterp(r,prog);aircraft.set(r.cs,{lat,lon,heading,alt:r.alt,callsign:r.cs,country:r.isMil?'USAF/NATO':'Commercial',squawk:r.isMil?'7777':'1200',vel:r.vel,trail:[],isMil:r.isMil,isEmergency:false,lastSeen:now,_sim:true});});flightCount=aircraft.size;milCount=[...aircraft.values()].filter(a=>a.isMil).length;}
+async function fetchFlights(){
+  setFlightStatus('loading');
+  try{
+    const res=await fetch('https://api.adsb.lol/v2/sampledall',{signal:AbortSignal.timeout(10000)});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();const states=data.ac||data.aircraft||[];
+    if(!states.length)throw new Error('empty');
+    const now=Date.now();aircraft.clear();
+    for(const s of states){
+      const icao=(s.hex||'').toLowerCase();const cs=(s.flight||'').trim();
+      const lat=s.lat??s.latitude,lon=s.lon??s.longitude;
+      if(lat==null||lon==null||Math.abs(lat)>90||Math.abs(lon)>180)continue;
+      const mil=isMilICAO(icao)||isMilCS(cs);const emergency=s.squawk==='7700'||s.squawk==='7600'||s.squawk==='7500';
+      const existing=aircraft.get(icao);const trail=existing?[...existing.trail,{lat:existing.lat,lon:existing.lon}].slice(-TRAIL_MAX):[];
+      aircraft.set(icao,{lat,lon,heading:s.track||0,alt:s.alt_baro||0,callsign:cs,country:s.r||'',squawk:s.squawk||'',vel:s.gs||0,trail,isMil:mil,isEmergency:emergency,lastSeen:now,_sim:false});
+    }
+    flightCount=aircraft.size;milCount=[...aircraft.values()].filter(a=>a.isMil).length;setFlightStatus('live');
+  }catch(e){if(aircraft.size===0||[...aircraft.values()].every(a=>a._sim))seedSim();setFlightStatus('sim');}
+}
+function setFlightStatus(s){const d=document.getElementById('flight-status-dot'),ct=document.getElementById('flight-count');if(!d)return;const c={live:'#06b6d4',loading:'#eab308',sim:'#8b5cf6',idle:'#374151'}[s]||'#ef4444';d.style.background=c;d.style.boxShadow=`0 0 5px ${c}`;if(ct)ct.textContent=s==='live'?`${flightCount} ACFT / ${milCount} MIL · LIVE`:s==='sim'?`${flightCount} ACFT / ${milCount} MIL · SIM`:'---';}
+function startFlightTracking(){fetchFlights();flightFetchTimer=setInterval(fetchFlights,FLIGHT_REFRESH);}
+function stopFlightTracking(){if(flightFetchTimer)clearInterval(flightFetchTimer);aircraft.clear();flightCount=0;milCount=0;setFlightStatus('idle');}
+function drawFlights(){
+  if(aircraft.size===0)return;
+  const STEP=0.000012;
+  for(const[icao,ac]of aircraft){
+    if(!ac._sim)continue;
+    const r=SIM_ROUTES.find(x=>x.cs===icao);if(!r)continue;
+    const st=simState.get(icao)||{prog:0,dir:1};st.prog+=STEP*st.dir;
+    if(st.prog>=1){st.prog=1;st.dir=-1;}else if(st.prog<=0){st.prog=0;st.dir=1;}
+    simState.set(icao,st);const{lat,lon,heading}=simInterp(r,st.prog);ac.lat=lat;ac.lon=lon;ac.heading=heading;
+  }
+  for(const[,ac]of aircraft){
+    const s=ll2s(ac.lat,ac.lon);if(s.x<-20||s.x>ovC.width+20||s.y<-20||s.y>ovC.height+20)continue;
+    const col=ac.isEmergency?'#ef4444':ac.isMil?'#f59e0b':'#06b6d4';
+    const sz=Math.max(2,Math.min(5,2+(ac.alt||0)/4000));
+    if(ac.trail.length>1){const cr=parseInt(col.slice(1,3),16),cg=parseInt(col.slice(3,5),16),cb=parseInt(col.slice(5,7),16);for(let i=1;i<ac.trail.length;i++){const a=ll2s(ac.trail[i-1].lat,ac.trail[i-1].lon),b=ll2s(ac.trail[i].lat,ac.trail[i].lon);if(Math.abs(b.x-a.x)>ovC.width*0.3)continue;octx.strokeStyle=`rgba(${cr},${cg},${cb},${(i/ac.trail.length)*0.5})`;octx.lineWidth=1.2;octx.beginPath();octx.moveTo(a.x,a.y);octx.lineTo(b.x,b.y);octx.stroke();}}
+    octx.save();octx.translate(s.x,s.y);octx.rotate((ac.heading||0)*Math.PI/180);
+    const grd=octx.createRadialGradient(0,0,0,0,0,sz*4);grd.addColorStop(0,col+'66');grd.addColorStop(1,col+'00');octx.beginPath();octx.arc(0,0,sz*4,0,Math.PI*2);octx.fillStyle=grd;octx.fill();
+    const w=sz*0.7,h=sz*1.8;octx.fillStyle=col;octx.beginPath();octx.moveTo(0,-h);octx.lineTo(w,h*0.3);octx.lineTo(0,0);octx.lineTo(-w,h*0.3);octx.closePath();octx.fill();
+    octx.restore();
+    if(ac.isMil){octx.font='bold 10px Share Tech Mono';octx.fillStyle='#f59e0b';octx.fillText('★',s.x+sz+1,s.y-sz);}
+    if((ac.isMil||zoom>=6)&&ac.callsign){octx.font='10px Share Tech Mono';octx.fillStyle=col;octx.textAlign='left';octx.fillText(ac.callsign,s.x+sz+3,s.y+3);}
+  }
+  octx.textAlign='left';
+}
+function flightAt(mx,my){let best=null,bd=Infinity;for(const[icao,ac]of aircraft){const s=ll2s(ac.lat,ac.lon);const d=Math.hypot(s.x-mx,s.y-my);if(d<12&&d<bd){bd=d;best={icao,...ac};}}return best;}
+
+// ═══════════════════════════════════════
+// HIT DETECTION / MOUSE
+// ═══════════════════════════════════════
+function evAt(mx,my){const evs=activeFilter==='ALL'||activeFilter==='KW'?EVENTS:EVENTS.filter(e=>e.type===activeFilter);for(const ev of evs){const s=ll2s(ev.lat,ev.lon);if(Math.hypot(s.x-mx,s.y-my)<(SS[ev.sev]||4)*4)return ev;}return null;}
+
+hitC.addEventListener('mousedown',e=>{isDragging=true;lastMX=e.clientX;lastMY=e.clientY;hitC.style.cursor='grabbing';});
+window.addEventListener('mouseup',()=>{isDragging=false;hitC.style.cursor='crosshair';});
+window.addEventListener('mousemove',e=>{
+  if(isDragging){
+    // Night mask must be rebuilt on pan since it's position-dependent
+    nightMaskTime=-1;
+    panX-=e.clientX-lastMX;panY-=e.clientY-lastMY;lastMX=e.clientX;lastMY=e.clientY;clampPan();renderTiles();markDirty();return;
+  }
+  const r=hitC.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
+  const ev=evAt(mx,my);
+  const fl=!ev&&LAYERS.flights?flightAt(mx,my):null;
+  const sl=!ev&&!fl&&LAYERS.shipping?shippingAt(mx,my):null;
+  const vessel=!ev&&!fl&&!sl&&LAYERS.ais?aisAt(mx,my):null;
+  const mu=!ev&&!fl&&!sl&&!vessel&&LAYERS.mil?milUnitAt(mx,my):null;
+  const base=!ev&&!fl&&!sl&&!vessel&&!mu&&LAYERS.bases?baseAt(mx,my):null;
+  hoveredEvent=ev||null;hoveredLane=sl||null;hoveredUnit=mu||null;hoveredBase=base||null;
+  const tt=document.getElementById('tooltip');
+  if(ev){
+    document.getElementById('tt-title').textContent=ev.title;
+    document.getElementById('tt-loc').textContent='◉ '+ev.loc;
+    document.getElementById('tt-body').textContent=ev.body;
+    const sd=EVENT_SENTIMENT[ev.id];
+    document.getElementById('tt-sent').innerHTML=sd?`<span style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44;border-radius:2px;padding:1px 5px">POS ${sd.pos}%</span><span style="background:#ef444422;color:#ef4444;border:1px solid #ef444444;border-radius:2px;padding:1px 5px">NEG ${sd.neg}%</span>`:'';
+    tt.style.display='block';tt.style.left=Math.min(mx+14,hitC.clientWidth-260)+'px';tt.style.top=Math.max(my-10,5)+'px';
+  }else if(fl){
+    document.getElementById('tt-title').textContent=(fl.isMil?'★ MIL — ':'✈ ')+(fl.callsign||fl.icao||'UNKNOWN');
+    document.getElementById('tt-loc').textContent=`${fl.country||'—'} · SQUAWK ${fl.squawk||'—'}`;
+    document.getElementById('tt-body').textContent=`ALT: ${fl.alt?Math.round(fl.alt*3.281)+'ft':'—'}  SPD: ${fl.vel?Math.round(fl.vel)+'kts':'—'}  HDG: ${fl.heading||0}°${fl.isEmergency?' ⚠ EMERGENCY':''}`;
+    document.getElementById('tt-sent').innerHTML='';
+    tt.style.display='block';tt.style.left=Math.min(mx+14,hitC.clientWidth-260)+'px';tt.style.top=Math.max(my-10,5)+'px';
+  }else if(sl){
+    document.getElementById('tt-title').textContent='⚓ '+sl.name;
+    document.getElementById('tt-loc').textContent=(sl.chokepoint||sl.type)+' LANE';
+    const cp=sl.chokepoint?CHOKEPOINTS[sl.chokepoint]:null;
+    document.getElementById('tt-body').textContent=sl.vol+(cp?'\n\nTRADE: '+cp.trade+'\nTHREAT: '+cp.threat+'\n'+cp.note:'');
+    document.getElementById('tt-sent').innerHTML='';
+    tt.style.display='block';tt.style.left=Math.min(mx+14,hitC.clientWidth-280)+'px';tt.style.top=Math.max(my-10,5)+'px';
+  }else if(mu){
+    document.getElementById('tt-title').textContent=mu.name;
+    document.getElementById('tt-loc').textContent='◉ '+mu.loc+'  ·  '+mu.strength;
+    document.getElementById('tt-body').textContent=`STATUS: ${mu.status}\nREADINESS: ${mu.readiness}\nASSETS: ${mu.assets}\n\n${mu.note}`;
+    document.getElementById('tt-sent').innerHTML='';
+    tt.style.display='block';tt.style.left=Math.min(mx+14,hitC.clientWidth-280)+'px';tt.style.top=Math.max(my-10,5)+'px';
+  }else if(base){
+    const svcCol=BASE_COLORS[base.service]||'#94a3b8';
+    document.getElementById('tt-title').textContent=base.name+(base.prev?` (prev: ${base.prev})`:'');
+    document.getElementById('tt-loc').textContent=`◉ ${base.loc}  ·  ${base.service}`;
+    document.getElementById('tt-body').textContent=`DISPOSITION: ${base.disposition}\nPERSONNEL: ${base.personnel}\nROLE: ${base.role}\n\n${base.purpose}`;
+    document.getElementById('tt-sent').innerHTML=`<span style="background:${svcCol}22;color:${svcCol};border:1px solid ${svcCol}44;border-radius:2px;padding:1px 6px;font-size:9px">${base.service}</span>`;
+    tt.style.display='block';tt.style.left=Math.min(mx+14,hitC.clientWidth-300)+'px';tt.style.top=Math.max(my-10,5)+'px';
+  }else if(vessel){
+    const vcol=getVesselColor(vessel.type);
+    document.getElementById('tt-title').textContent='⚓ '+vessel.name;
+    document.getElementById('tt-loc').textContent=`MMSI: ${vessel.mmsi}  ·  FLAG: ${vessel.flag||'—'}`;
+    document.getElementById('tt-body').textContent=`SPD: ${vessel.speed}kts  HDG: ${vessel.course}°\nDEST: ${vessel.destination||'—'}\nTYPE CODE: ${vessel.type}`;
+    document.getElementById('tt-sent').innerHTML=`<span style="background:${vcol}22;color:${vcol};border:1px solid ${vcol}44;border-radius:2px;padding:1px 6px;font-size:9px">AIS LIVE</span>`;
+    tt.style.display='block';tt.style.left=Math.min(mx+14,hitC.clientWidth-240)+'px';tt.style.top=Math.max(my-10,5)+'px';
+  }else{tt.style.display='none';}
+  const ll=s2ll(mx,my);if(ll.lat>=-85&&ll.lat<=85)document.getElementById('coord-bar').textContent=`LAT: ${ll.lat.toFixed(3)}°  LON: ${ll.lon.toFixed(3)}°`;
+});
+hitC.addEventListener('click',e=>{
+  const r=hitC.getBoundingClientRect();const ev=evAt(e.clientX-r.left,e.clientY-r.top);
+  if(!ev)return;selectedEvent=ev;setLeftTab('events');
+});
+hitC.addEventListener('wheel',e=>{
+  e.preventDefault();const r=hitC.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
+  const ll=s2ll(mx,my);const dz=e.deltaY>0?-1:1;const nz=Math.max(1,Math.min(10,zoom+dz));
+  if(nz===zoom)return;zoom=nz;
+  nightMaskTime=-1;
+  const nw=ll2world(ll.lat,ll.lon);panX=nw.x-mx;panY=nw.y-my;
+  clampPan();renderTiles();syncZoomSlider();markDirty();
+},{passive:false});
+
+function clampPan(){const n=1<<zoom;const total=n*TILE_SIZE;panY=Math.max(0,Math.min(total-tileC.height,panY));panX=((panX%total)+total)%total;}
+function zoomToLevel(level){const W=tileC.width/2,H=tileC.height/2;const ll=s2ll(W,H);zoom=Math.max(1,Math.min(10,level));nightMaskTime=-1;const nw=ll2world(ll.lat,ll.lon);panX=nw.x-W;panY=nw.y-H;clampPan();renderTiles();markDirty();syncZoomSlider();}
+function zoomMap(dz){zoomToLevel(zoom+dz);}
+function syncZoomSlider(){const s=document.getElementById('zoom-slider');if(s)s.value=zoom;document.getElementById('zoom-level').textContent='Z'+zoom;}
+function resetView(){zoom=2;nightMaskTime=-1;const n=1<<zoom;panX=(n*TILE_SIZE-tileC.width)/2;panY=(n*TILE_SIZE-tileC.height)/2;clampPan();renderTiles();syncZoomSlider();markDirty();}
+
+// ═══════════════════════════════════════
+// NEWS FEED
+// ═══════════════════════════════════════
+function buildNewsFeed(){
+  const feed=document.getElementById('news-feed');feed.innerHTML='';
+  let items;
+  if(activeFilter==='KW')items=NEWS.filter(n=>n._kwMatches&&n._kwMatches.length>0);
+  else items=(activeFilter==='ALL'?NEWS:NEWS.filter(n=>n.cat===activeFilter)).slice(0,40);
+  if(!items.length){feed.innerHTML='<div style="padding:12px 14px;font-size:11px;color:#4a5568">NO ITEMS MATCH FILTER</div>';return;}
+  for(const it of items){
+    const isKW=it._kwMatches&&it._kwMatches.length>0;
+    const d=document.createElement('div');
+    d.className='news-item'+(it.hot?' hot':'')+(isKW?' kw-match':'');
+    const kwTags=isKW?it._kwMatches.map(m=>`<span class="kw-tag">${m.kw}</span>`).join(''):'';
+    const liveTag=liveNewsActive?'<span style="font-size:9px;color:#22c55e;border:1px solid #22c55e44;background:#22c55e11;padding:1px 4px;border-radius:2px;margin-left:4px">LIVE</span>':'';
+    d.innerHTML=`<div class="ntime">${it.time}Z</div><div class="ncat etag ${it.cat.toLowerCase()}">${it.cat}</div><div class="ntext"><div class="nhead">${it.h}${liveTag}${kwTags}</div><div class="nsub">${it.s}</div></div><div class="nsrc">${it.src}</div>`;
+    d.addEventListener('click',()=>openArticle(it));
+    feed.appendChild(d);
+  }
+  document.getElementById('kw-feed-tab').textContent=`🔍KW(${NEWS.filter(n=>n._kwMatches&&n._kwMatches.length).length})`;
+}
+
+function buildTicker(){
+  const t=document.getElementById('ticker');
+  const titles=NEWS.slice(0,20).map(n=>n.h);
+  t.innerHTML=[...titles,...titles].map(x=>{const hot=x.toLowerCase().includes('break');return`<span style="color:${hot?'#ef4444':'#6b7280'}">${hot?'🔴 ':''}${x}</span><span class="tsep">◈</span>`;}).join('');
+}
+
+function setFilter(f){
+  activeFilter=f;
+  document.querySelectorAll('.ns-tab').forEach(el=>el.classList.toggle('active',el.textContent.replace(/\(\d+\)/,'').trim()===f||(el.id==='kw-feed-tab'&&f==='KW')));
+  buildNewsFeed();if(activeLeftTab==='events')buildLeftContent();
+}
+function scrollNews(){const w=document.getElementById('news-scroll-wrap');if(!w||w.matches(':hover'))return;w.scrollTop+=0.5;if(w.scrollTop>=w.scrollHeight-w.clientHeight-5)w.scrollTop=0;}
+
+// ═══════════════════════════════════════
+// CLOCK / RESIZE / LOOP
+// ═══════════════════════════════════════
+function updateClock(){const n=new Date();document.getElementById('utc-clock').textContent=[n.getUTCHours(),n.getUTCMinutes(),n.getUTCSeconds()].map(v=>String(v).padStart(2,'0')).join(':');document.getElementById('utc-date').textContent=n.toUTCString().slice(0,16).toUpperCase();}
+function resize(){
+  nightMaskTime=-1;
+  const W=mapWrap.clientWidth,H=mapWrap.clientHeight;
+  [tileC,ovC,hitC].forEach(c=>{c.width=W;c.height=H;});
+  renderTiles();
+}
+window.addEventListener('resize',resize);
+
+// ═══════════════════════════════════════
+// PERFORMANCE — DIRTY FLAG RAF LOOP
+// ═══════════════════════════════════════
+let _dirty=true;
+let _lastDraw=0;
+let _lastScroll=0;
+const DRAW_INTERVAL=40; // max 25fps for canvas (smooth enough, half CPU cost)
+
+function markDirty(){_dirty=true;}
+
+function loop(ts){
+  if(ts-_lastScroll>90){scrollNews();_lastScroll=ts;}
+  updateClock();
+  // Only redraw when dirty OR moving aircraft (every 40ms max)
+  const hasAnimated=LAYERS.flights&&aircraft.size>0;
+  const hasPulse=LAYERS.bases||LAYERS.mil||LAYERS.acled||LAYERS.firms;
+  const needsAnim=hasAnimated||hasPulse;
+  if(_dirty||(needsAnim&&ts-_lastDraw>DRAW_INTERVAL)){
+    drawOverlay();
+    _lastDraw=ts;
+    _dirty=false;
+  }
+  requestAnimationFrame(loop);
+}
+
+// ═══════════════════════════════════════
+// STOCK TICKER ENGINE
+// ═══════════════════════════════════════
+// Symbols: Major indices (as ETFs), defense/intel/energy sector, macro-relevant
+const STOCK_SYMBOLS=[
+  // Indices via ETFs
+  {sym:'SPY',  name:'S&P 500'},
+  {sym:'QQQ',  name:'NASDAQ'},
+  {sym:'DIA',  name:'DOW'},
+  {sym:'IWM',  name:'RUSSELL'},
+  {sym:'VIX',  name:'VIX', isIndex:true},
+  // Defense / IC sector
+  {sym:'LMT',  name:'Lockheed'},
+  {sym:'RTX',  name:'Raytheon'},
+  {sym:'NOC',  name:'Northrop'},
+  {sym:'GD',   name:'Gen Dynamics'},
+  {sym:'BA',   name:'Boeing'},
+  {sym:'L3HT', name:'L3Harris'},
+  // Energy / Macro
+  {sym:'XOM',  name:'ExxonMobil'},
+  {sym:'CVX',  name:'Chevron'},
+  {sym:'USO',  name:'Crude Oil ETF'},
+  {sym:'GLD',  name:'Gold ETF'},
+  // Cyber
+  {sym:'PANW', name:'Palo Alto'},
+  {sym:'CRWD', name:'CrowdStrike'},
+  // FX / Rates via ETFs
+  {sym:'TLT',  name:'20yr Treasury'},
+  {sym:'UUP',  name:'USD Index'},
+];
+
+// Cache: symbol → {price, change, pct, dir, ts}
+const stockCache=new Map();
+let stockRefreshTimer=null;
+let stockLastFetch=0;
+
+// Yahoo Finance v8 — no API key, CORS-friendly via allorigins proxy
+async function fetchStockQuote(sym){
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1m&range=1d`;
+  const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  const res=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const wrapper=await res.json();
+  const data=JSON.parse(wrapper.contents);
+  const meta=data?.chart?.result?.[0]?.meta;
+  if(!meta)throw new Error('no meta');
+  const price=meta.regularMarketPrice??meta.previousClose;
+  const prev=meta.chartPreviousClose??meta.previousClose??price;
+  const change=price-prev;
+  const pct=(change/prev)*100;
+  return{price,change,pct,dir:change>0.005?'up':change<-0.005?'dn':'flat'};
+}
+
+async function refreshAllStocks(){
+  // Fetch in batches of 4 to avoid hammering proxy
+  const symbols=STOCK_SYMBOLS.map(s=>s.sym);
+  for(let i=0;i<symbols.length;i+=4){
+    const batch=symbols.slice(i,i+4);
+    await Promise.allSettled(batch.map(async sym=>{
+      try{
+        const q=await fetchStockQuote(sym);
+        stockCache.set(sym,{...q,ts:Date.now()});
+      }catch(e){
+        // Keep stale data if available, else mark as unavailable
+        if(!stockCache.has(sym))stockCache.set(sym,{price:null,change:0,pct:0,dir:'flat',ts:0});
+      }
+    }));
+    await new Promise(r=>setTimeout(r,300)); // small stagger between batches
+  }
+  stockLastFetch=Date.now();
+  renderStockTicker();
+}
+
+function renderStockTicker(){
+  const el=document.getElementById('stock-inner');
+  if(!el)return;
+
+  // Build one full set of items, then duplicate for seamless loop
+  const items=STOCK_SYMBOLS.map(s=>{
+    const d=stockCache.get(s.sym);
+    if(!d||d.price===null){
+      return`<span class="stk-item"><span class="stk-sym">${s.sym}</span><span class="stk-price" style="color:#1a3060">—</span></span><span class="stk-sep">|</span>`;
+    }
+    const price=d.price>=100?d.price.toFixed(2):d.price.toFixed(2);
+    const chgSign=d.change>=0?'+':'';
+    const arrow=d.dir==='up'?'▲':d.dir==='dn'?'▼':'—';
+    return`<span class="stk-item" title="${s.name}">
+      <span class="stk-sym">${s.sym}</span>
+      <span class="stk-price">$${price}</span>
+      <span class="stk-chg ${d.dir}">${arrow}${chgSign}${d.pct.toFixed(2)}%</span>
+    </span><span class="stk-sep">|</span>`;
+  }).join('');
+
+  // Duplicate content for seamless infinite scroll
+  el.innerHTML=items+items;
+
+  // Adjust animation speed based on content width — recalc after render
+  requestAnimationFrame(()=>{
+    const totalW=el.scrollWidth/2; // half because we duplicated
+    const speed=Math.max(40,Math.min(120,totalW/80)); // px/sec → seconds for full scroll
+    el.style.animationDuration=speed+'s';
+  });
+}
+
+// Seed with placeholder data immediately so ticker isn't empty on load
+function seedStockPlaceholders(){
+  // Use reasonable static values as placeholders while fetching
+  const seeds={
+    SPY:{price:589.42,change:2.18,pct:0.37,dir:'up'},
+    QQQ:{price:510.77,change:3.45,pct:0.68,dir:'up'},
+    DIA:{price:439.12,change:-1.22,pct:-0.28,dir:'dn'},
+    IWM:{price:219.54,change:0.88,pct:0.40,dir:'up'},
+    VIX:{price:14.82,change:-0.34,pct:-2.24,dir:'dn'},
+    LMT:{price:472.10,change:4.20,pct:0.90,dir:'up'},
+    RTX:{price:124.55,change:1.80,pct:1.47,dir:'up'},
+    NOC:{price:486.30,change:3.10,pct:0.64,dir:'up'},
+    GD: {price:284.75,change:2.30,pct:0.82,dir:'up'},
+    BA: {price:162.40,change:-2.10,pct:-1.28,dir:'dn'},
+    L3HT:{price:240.60,change:1.55,pct:0.65,dir:'up'},
+    XOM:{price:115.22,change:-0.88,pct:-0.76,dir:'dn'},
+    CVX:{price:158.30,change:-1.20,pct:-0.75,dir:'dn'},
+    USO:{price:72.14,change:-0.55,pct:-0.76,dir:'dn'},
+    GLD:{price:232.80,change:1.44,pct:0.62,dir:'up'},
+    PANW:{price:188.30,change:2.70,pct:1.45,dir:'up'},
+    CRWD:{price:368.50,change:5.20,pct:1.43,dir:'up'},
+    TLT:{price:89.60,change:-0.40,pct:-0.44,dir:'dn'},
+    UUP:{price:28.44,change:0.12,pct:0.42,dir:'up'},
+  };
+  const now=Date.now();
+  for(const[sym,d]of Object.entries(seeds)){
+    stockCache.set(sym,{...d,ts:now,seeded:true});
+  }
+  renderStockTicker();
+}
+
+function startStockTracking(){
+  seedStockPlaceholders();
+  // First real fetch after a short delay to not block initial render
+  setTimeout(()=>refreshAllStocks(),2000);
+  // Refresh every 60 seconds — Yahoo Finance rate-limits aggressively
+  stockRefreshTimer=setInterval(refreshAllStocks,60000);
+}
+
+// Market status badge
+function isMarketOpen(){
+  const now=new Date();
+  const utcH=now.getUTCHours(),utcM=now.getUTCMinutes();
+  const etOffset=-4; // EDT (UTC-4 during daylight saving)
+  const etH=((utcH+etOffset)+24)%24;
+  const etMin=etH*60+utcM;
+  const day=now.getUTCDay();
+  if(day===0||day===6)return false; // weekend
+  return etMin>=570&&etMin<960; // 9:30 AM – 4:00 PM ET
+}
+
+function updateMarketLabel(){
+  const lbl=document.getElementById('stock-label');
+  if(!lbl)return;
+  const open=isMarketOpen();
+  const dot=open
+    ?'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 5px #22c55e;margin-right:4px;vertical-align:middle;animation:pulse 1.5s infinite"></span>'
+    :'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#374151;margin-right:4px;vertical-align:middle"></span>';
+  lbl.innerHTML=`${dot}<span style="font-family:Orbitron,monospace;font-size:9px;color:#f59e0b;letter-spacing:2px">${open?'MARKETS LIVE':'MARKETS CLOSED'}</span>`;
+}
+
+
+resize();resetView();
+renderLayerPanel();
+buildLeftContent();updateAlertBadge();updateSentimentMini();
+setFeedStatus('loading');fetchAllFeeds();
+setInterval(fetchAllFeeds,5*60*1000);
+// Detect proxy first — APIs will use real endpoints if proxy is running
+detectProxy().then(()=>{ startAllAPIs(); });
+startStockTracking();
+updateMarketLabel();
+setInterval(updateMarketLabel,30000);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
