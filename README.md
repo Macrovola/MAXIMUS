@@ -1,2 +1,0 @@
-# MAXIMUS
-Geospatial intelligence tracker
