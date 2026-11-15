@@ -1,0 +1,54 @@
+name: Fetch GEOINT feeds
+
+# Hourly: fetch USGS, NASA EONET, NWS and NASA FIRMS, normalize them into
+# data/feeds.json, and publish that one file to the `feeds-data` branch.
+# The branch is force-pushed as a single commit each run, so hourly
+# updates never grow the repository's history.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-feeds
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Test parsers
+        run: python -m unittest backend/test_fetch_feeds.py
+
+      - name: Restore last run (fallback for any source that fails)
+        run: |
+          mkdir -p data
+          if git fetch --depth 1 origin feeds-data 2>/dev/null; then
+            git show FETCH_HEAD:data/feeds.json > data/feeds.json || rm -f data/feeds.json
+          fi
+
+      - name: Fetch and normalize feeds
+        run: python backend/fetch_feeds.py data/feeds.json
+
+      - name: Publish to feeds-data branch
+        run: |
+          cp data/feeds.json /tmp/feeds.json
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan feeds-data-tmp
+          git rm -rf --cached . >/dev/null
+          git clean -fdx >/dev/null
+          mkdir -p data && cp /tmp/feeds.json data/feeds.json
+          git add data/feeds.json
+          git commit -m "Feeds snapshot $(date -u +%Y-%m-%dT%H:%MZ)" >/dev/null
+          git push --force origin HEAD:feeds-data
