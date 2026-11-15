@@ -39,6 +39,10 @@ SOURCES = {
         "name": "NWS active U.S. weather alerts",
         "url": "https://api.weather.gov/alerts/active?status=actual",
     },
+    "gdacs": {
+        "name": "GDACS global disaster alerts",
+        "url": "https://www.gdacs.org/xml/rss.xml",
+    },
     "firms": {
         "name": "NASA FIRMS active fires (24 h, high confidence)",
         "url": "https://firms.modaps.eosdis.nasa.gov/active_fire/",
@@ -200,8 +204,40 @@ def parse_firms(raw: bytes):
     return out
 
 
-PARSERS = {"usgs": parse_usgs, "eonet": parse_eonet, "nws": parse_nws, "firms": parse_firms}
-SRC_LABEL = {"usgs": "USGS", "eonet": "NASA EONET", "nws": "NWS alerts", "firms": "NASA FIRMS"}
+GDACS_TYPES = {"EQ": "Earthquake", "TC": "Tropical cyclone", "FL": "Flood", "VO": "Volcano", "DR": "Drought",
+               "WF": "Wildfire", "TS": "Tsunami"}
+
+
+def parse_gdacs(raw: bytes):
+    import xml.etree.ElementTree as ET
+    out = []
+    for item in ET.fromstring(raw).iter("item"):
+        f = {}
+        for el in item.iter():
+            name = el.tag.rsplit("}", 1)[-1].lower()
+            if name not in f and (el.text or "").strip():
+                f[name] = el.text.strip()
+        try:
+            lat, lon = float(f["lat"]), float(f["long"])
+        except (KeyError, ValueError):
+            continue
+        etype = f.get("eventtype", "")
+        t = None
+        if f.get("pubdate"):
+            from email.utils import parsedate_to_datetime
+            try:
+                t = int(parsedate_to_datetime(f["pubdate"]).timestamp() * 1000)
+            except (TypeError, ValueError):
+                t = None
+        e = ev("GDACS", f"{etype}{f.get('eventid', '')}-{f.get('episodeid', '')}", GDACS_TYPES.get(etype, "Disaster alert"),
+               f.get("title", "GDACS alert"), lon, lat, t, None, "", f.get("link"), f.get("alertlevel"))
+        if e:
+            out.append(e)
+    return out
+
+
+PARSERS = {"usgs": parse_usgs, "eonet": parse_eonet, "nws": parse_nws, "gdacs": parse_gdacs, "firms": parse_firms}
+SRC_LABEL = {"usgs": "USGS", "eonet": "NASA EONET", "nws": "NWS alerts", "gdacs": "GDACS", "firms": "NASA FIRMS"}
 
 
 # ---------- run ----------

@@ -1,0 +1,58 @@
+{
+  "_comment": "Edit this file to add or remove outlets and streams. Region ids match the tracker site: global, eeurope, mideast, indopac, africa, namerica, samerica, arctic. Every source here was confirmed reachable from GitHub Actions on 2026-11-15.",
+  "wires": [
+    {"id": "bbc-world", "name": "BBC News – World", "url": "https://feeds.bbci.co.uk/news/world/rss.xml", "regions": ["global"]},
+    {"id": "aljazeera", "name": "Al Jazeera English", "url": "https://www.aljazeera.com/xml/rss/all.xml", "regions": ["global", "mideast"]},
+    {"id": "un-news", "name": "UN News", "url": "https://news.un.org/feed/subscribe/en/news/all/rss.xml", "regions": ["global"]},
+    {"id": "france24", "name": "France 24 English", "url": "https://www.france24.com/en/rss", "regions": ["global"]},
+    {"id": "dw", "name": "DW (Deutsche Welle) English", "url": "https://rss.dw.com/rdf/rss-en-all", "regions": ["global"]},
+    {"id": "npr-world", "name": "NPR World", "url": "https://feeds.npr.org/1004/rss.xml", "regions": ["global"]},
+    {"id": "bbc-europe", "name": "BBC News – Europe", "url": "https://feeds.bbci.co.uk/news/world/europe/rss.xml", "regions": ["eeurope"]},
+    {"id": "kyiv-independent", "name": "The Kyiv Independent", "url": "https://kyivindependent.com/news-archive/rss/", "regions": ["eeurope"]},
+    {"id": "meduza", "name": "Meduza (English)", "url": "https://meduza.io/rss/en/all", "regions": ["eeurope"]},
+    {"id": "rferl", "name": "Radio Free Europe/Radio Liberty", "url": "https://www.rferl.org/api/", "regions": ["eeurope"]},
+    {"id": "moscow-times", "name": "The Moscow Times", "url": "https://www.themoscowtimes.com/rss/news", "regions": ["eeurope"]},
+    {"id": "bbc-mideast", "name": "BBC News – Middle East", "url": "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml", "regions": ["mideast"]},
+    {"id": "bbc-asia", "name": "BBC News – Asia", "url": "https://feeds.bbci.co.uk/news/world/asia/rss.xml", "regions": ["indopac"]},
+    {"id": "scmp", "name": "South China Morning Post", "url": "https://www.scmp.com/rss/91/feed", "regions": ["indopac"]},
+    {"id": "bbc-africa", "name": "BBC News – Africa", "url": "https://feeds.bbci.co.uk/news/world/africa/rss.xml", "regions": ["africa"]},
+    {"id": "africanews", "name": "Africanews", "url": "https://www.africanews.com/feed/rss", "regions": ["africa"]},
+    {"id": "bbc-us-canada", "name": "BBC News – US & Canada", "url": "https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml", "regions": ["namerica"]},
+    {"id": "bbc-latam", "name": "BBC News – Latin America", "url": "https://feeds.bbci.co.uk/news/world/latin_america/rss.xml", "regions": ["samerica"]}
+  ],
+  "streams": [
+    {"name": "Al Jazeera English", "kind": "Live news channel", "url": "https://www.youtube.com/@aljazeeraenglish/live", "regions": ["global", "mideast"]},
+    {"name": "DW News", "kind": "Live news channel", "url": "https://www.youtube.com/@dwnews/live", "regions": ["global", "eeurope"]},
+    {"name": "France 24 English", "kind": "Live news channel", "url": "https://www.youtube.com/@France24_en/live", "regions": ["global", "africa"]},
+    {"name": "Sky News", "kind": "Live news channel", "url": "https://www.youtube.com/@SkyNews/live", "regions": ["global"]},
+    {"name": "Euronews", "kind": "Live news channel", "url": "https://www.youtube.com/@euronews/live", "regions": ["eeurope"]},
+    {"name": "The Kyiv Independent", "kind": "Video channel", "url": "https://www.youtube.com/@KyivIndependent/live", "regions": ["eeurope"]},
+    {"name": "TRT World", "kind": "Live news channel", "url": "https://www.youtube.com/@TRTWorld/live", "regions": ["mideast", "eeurope"]},
+    {"name": "NHK World-Japan", "kind": "Live news channel", "url": "https://www.youtube.com/@NHKWORLDJAPAN/live", "regions": ["indopac"]},
+    {"name": "ABC News Australia", "kind": "Live news channel", "url": "https://www.youtube.com/@ABCNewsAustralia/live", "regions": ["indopac"]},
+    {"name": "WION", "kind": "Live news channel", "url": "https://www.youtube.com/@WION/live", "regions": ["indopac"]},
+    {"name": "CBS News", "kind": "Live news channel", "url": "https://www.youtube.com/@CBSNews/live", "regions": ["namerica"]},
+    {"name": "NBC News", "kind": "Live news channel", "url": "https://www.youtube.com/@NBCNews/live", "regions": ["namerica"]},
+    {"name": "NASA", "kind": "Live space coverage", "url": "https://www.youtube.com/@NASA/live", "regions": ["global"]},
+    {"name": "USGS Kīlauea volcano webcams", "kind": "Webcam", "url": "https://www.usgs.gov/volcanoes/kilauea/webcams", "regions": ["namerica"], "lat": 19.41, "lon": -155.29},
+    {"name": "Alaska Volcano Observatory webcams", "kind": "Webcam", "url": "https://avo.alaska.edu/webcam/", "regions": ["namerica", "arctic"], "lat": 61.22, "lon": -149.9}
+  ],
+  "imagery": {
+    "layers": [
+      "VIIRS_NOAA20_CorrectedReflectance_TrueColor",
+      "VIIRS_NOAA21_CorrectedReflectance_TrueColor",
+      "MODIS_Terra_CorrectedReflectance_TrueColor",
+      "MODIS_Aqua_CorrectedReflectance_TrueColor"
+    ],
+    "regions": [
+      {"id": "global", "name": "Global", "box": [-180, -90, 180, 90], "width": 1600},
+      {"id": "eeurope", "name": "Eastern Europe & Black Sea", "box": [20, 40, 60, 62], "width": 1200},
+      {"id": "mideast", "name": "Middle East", "box": [25, 12, 63, 42], "width": 1200},
+      {"id": "indopac", "name": "Indo-Pacific", "box": [95, -15, 160, 46], "width": 1200},
+      {"id": "africa", "name": "Africa", "box": [-20, -36, 52, 38], "width": 1100},
+      {"id": "namerica", "name": "North America", "box": [-170, 14, -50, 72], "width": 1400},
+      {"id": "samerica", "name": "Latin America", "box": [-118, -56, -30, 33], "width": 1100},
+      {"id": "arctic", "name": "Arctic", "box": [-180, 60, 180, 90], "width": 1600}
+    ]
+  }
+}
