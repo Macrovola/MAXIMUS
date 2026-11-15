@@ -40,8 +40,15 @@ SOURCES = {
         "url": "https://api.weather.gov/alerts/active?status=actual",
     },
     "firms": {
-        "name": "NASA FIRMS VIIRS active fires (24 h, high confidence)",
-        "url": "https://firms.modaps.eosdis.nasa.gov/data/active_fire/suomi-npp-viirs-c2/csv/SUOMI_VIIRS_C2_Global_24h.csv",
+        "name": "NASA FIRMS active fires (24 h, high confidence)",
+        "url": "https://firms.modaps.eosdis.nasa.gov/active_fire/",
+        # Tried in order; the first file with data rows is used (satellite files can be empty during outages).
+        "urls": [
+            "https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-20-viirs-c2/csv/J1_VIIRS_C2_Global_24h.csv",
+            "https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-21-viirs-c2/csv/J2_VIIRS_C2_Global_24h.csv",
+            "https://firms.modaps.eosdis.nasa.gov/data/active_fire/suomi-npp-viirs-c2/csv/SUOMI_VIIRS_C2_Global_24h.csv",
+            "https://firms.modaps.eosdis.nasa.gov/data/active_fire/modis-c6.1/csv/MODIS_C6_1_Global_24h.csv",
+        ],
     },
 }
 
@@ -207,7 +214,18 @@ def build(previous: dict | None, fetch=http_get, now=None) -> dict:
         status = {"id": sid, "name": meta["name"], "url": meta["url"], "ok": False, "stale": False,
                   "count": 0, "fetched": None, "error": None}
         try:
-            got = PARSERS[sid](fetch(meta["url"]))
+            got, errors = None, []
+            for url in meta.get("urls", [meta["url"]]):
+                try:
+                    got = PARSERS[sid](fetch(url))
+                    if got:
+                        break
+                    errors.append(f"{url.rsplit('/', 1)[-1]}: no events")
+                except Exception as exc:
+                    errors.append(f"{url.rsplit('/', 1)[-1]}: {type(exc).__name__}: {str(exc)[:80]}")
+                    got = None
+            if got is None:
+                raise RuntimeError("; ".join(errors))
             events.extend(got)
             status.update(ok=True, count=len(got), fetched=now.isoformat(timespec="seconds"))
         except Exception as exc:  # keep last good data for this source
