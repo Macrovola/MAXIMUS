@@ -40,8 +40,15 @@ SOURCES = {
         "url": "https://api.weather.gov/alerts/active?status=actual",
     },
     "firms": {
-        "name": "NASA FIRMS VIIRS active fires (24 h, high confidence)",
-        "url": "https://firms.modaps.eosdis.nasa.gov/data/active_fire/suomi-npp-viirs-c2/csv/SUOMI_VIIRS_C2_Global_24h.csv",
+        "name": "NASA FIRMS active fires (24 h, high confidence)",
+        "url": "https://firms.modaps.eosdis.nasa.gov/active_fire/",
+        # Tried in order; the first file with data rows is used (satellite files can be empty during outages).
+        "urls": [
+            "https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-20-viirs-c2/csv/J1_VIIRS_C2_Global_24h.csv",
+            "https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-21-viirs-c2/csv/J2_VIIRS_C2_Global_24h.csv",
+            "https://firms.modaps.eosdis.nasa.gov/data/active_fire/suomi-npp-viirs-c2/csv/SUOMI_VIIRS_C2_Global_24h.csv",
+            "https://firms.modaps.eosdis.nasa.gov/data/active_fire/modis-c6.1/csv/MODIS_C6_1_Global_24h.csv",
+        ],
     },
 }
 
@@ -157,24 +164,39 @@ def parse_nws(raw: bytes):
 
 
 def parse_firms(raw: bytes):
-    rows = []
-    for r in csv.DictReader(io.StringIO(raw.decode("utf-8", "replace"))):
-        if (r.get("confidence") or "").strip().lower() not in ("h", "high"):
-            continue
+    text = raw.decode("utf-8", "replace").lstrip("\ufeff")
+    reader = csv.DictReader(io.StringIO(text))
+    fields = [f.strip().lower() for f in (reader.fieldnames or [])]
+    if "latitude" not in fields or "longitude" not in fields:
+        raise ValueError(f"not a FIRMS CSV; response starts with {text[:120]!r}")
+    reader.fieldnames = fields
+    rows, seen = [], {}
+    for r in reader:
+        conf = (r.get("confidence") or "").strip().lower()
+        seen[conf] = seen.get(conf, 0) + 1
         try:
             lat, lon, frp = float(r["latitude"]), float(r["longitude"]), float(r.get("frp") or 0)
-        except (KeyError, ValueError):
+        except (KeyError, ValueError, TypeError):
             continue
-        rows.append((frp, lat, lon, r))
-    rows.sort(key=lambda x: -x[0])
+        rows.append((conf, frp, lat, lon, r))
+    if not rows:
+        raise ValueError("FIRMS CSV had a header but no data rows")
+    # VIIRS uses l/n/h; MODIS uses 0-100. Keep high confidence; fall back to nominal if none.
+    def is_high(c):
+        return c in ("h", "high") or (c.isdigit() and int(c) >= 80)
+    def is_nominal(c):
+        return c in ("n", "nominal") or (c.isdigit() and int(c) >= 30)
+    keep = [x for x in rows if is_high(x[0])] or [x for x in rows if is_nominal(x[0]) or is_high(x[0])]
+    keep.sort(key=lambda x: -x[1])
     out = []
-    for i, (frp, lat, lon, r) in enumerate(rows[:FIRMS_MAX]):
-        hm = (r.get("acq_time") or "0").zfill(4)
-        t = iso_ms(f"{r.get('acq_date')}T{hm[:2]}:{hm[2:]}:00+00:00")
+    for conf, frp, lat, lon, r in keep[:FIRMS_MAX]:
+        hm = (r.get("acq_time") or "0").strip().zfill(4)
+        t = iso_ms(f"{(r.get('acq_date') or '').strip()}T{hm[:2]}:{hm[2:]}:00+00:00")
         e = ev("NASA FIRMS", f"{r.get('acq_date')}-{hm}-{lat:.3f}-{lon:.3f}", "Wildfire / thermal anomaly",
                f"Thermal anomaly, FRP {frp:.1f} MW", lon, lat, t, round(frp, 1), "MW FRP")
         if e:
             out.append(e)
+    print(f"  firms: {len(rows)} rows, confidence values {dict(sorted(seen.items())[:10])}, kept {len(out)}")
     return out
 
 
@@ -192,7 +214,18 @@ def build(previous: dict | None, fetch=http_get, now=None) -> dict:
         status = {"id": sid, "name": meta["name"], "url": meta["url"], "ok": False, "stale": False,
                   "count": 0, "fetched": None, "error": None}
         try:
-            got = PARSERS[sid](fetch(meta["url"]))
+            got, errors = None, []
+            for url in meta.get("urls", [meta["url"]]):
+                try:
+                    got = PARSERS[sid](fetch(url))
+                    if got:
+                        break
+                    errors.append(f"{url.rsplit('/', 1)[-1]}: no events")
+                except Exception as exc:
+                    errors.append(f"{url.rsplit('/', 1)[-1]}: {type(exc).__name__}: {str(exc)[:80]}")
+                    got = None
+            if got is None:
+                raise RuntimeError("; ".join(errors))
             events.extend(got)
             status.update(ok=True, count=len(got), fetched=now.isoformat(timespec="seconds"))
         except Exception as exc:  # keep last good data for this source
