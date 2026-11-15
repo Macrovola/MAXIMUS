@@ -60,6 +60,12 @@ class Parsers(unittest.TestCase):
         self.assertEqual([x["mag"] for x in e], [55.2, 12.0])
         self.assertEqual(e[0]["t"], ff.iso_ms("2026-11-15T01:30:00Z"))
 
+    def test_firms_falls_back_to_nominal_and_rejects_html(self):
+        csv_n = FIRMS.decode().replace(",h,", ",n,").encode()
+        self.assertEqual(len(ff.parse_firms(csv_n)), 3)
+        with self.assertRaises(ValueError):
+            ff.parse_firms(b"<html>Service unavailable</html>")
+
     def test_failed_source_keeps_previous(self):
         previous = {"events": [{"id": "NASA FIRMS-old", "src": "NASA FIRMS", "lon": 1, "lat": 1}],
                     "sources": [{"id": "firms", "fetched": "2026-11-15T10:00:00+00:00"}]}
