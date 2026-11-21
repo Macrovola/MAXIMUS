@@ -1,0 +1,57 @@
+{
+ "files": {
+  "data/feeds.json": {
+   "bytes": 607415,
+   "sha256": "62aada145138efb23df23053593768928b81fa77677a3946dacd3d7daf7aa8fd"
+  },
+  "data/imagery.json": {
+   "bytes": 1638,
+   "sha256": "030a90830bed2f83d1dbefbf3c13eed319c78bb2efc0624870fa33a43afd3ae1"
+  },
+  "data/news.json": {
+   "bytes": 469700,
+   "sha256": "da3325b5b070e74bae91a2ccf6a376fd62808494244fe2e2275c075fcd2a55bb"
+  },
+  "data/streams.json": {
+   "bytes": 2885,
+   "sha256": "8c3c6e699b51b24dc213db3b21c483670321c6b7a1a3d762813a9253069c874f"
+  },
+  "data/wires.json": {
+   "bytes": 79908,
+   "sha256": "e7d817a57145847d46f2ba11cbf7279edc4bafe3b099516a1e4e9fee6118bd25"
+  },
+  "media/imagery/africa.jpg": {
+   "bytes": 349804,
+   "sha256": "65e80956216275293ff92ad2699153c05c840904381d0b1b0243b1c5979d5e1d"
+  },
+  "media/imagery/arctic.jpg": {
+   "bytes": 18164,
+   "sha256": "b1ba95dfe5026c50cc9a6f87db1ad6c443b58801f68cf01845f2408eff44f994"
+  },
+  "media/imagery/eeurope.jpg": {
+   "bytes": 147890,
+   "sha256": "cfdb6cc710ac39696c3180e87d3c0b5c472160168e4f69e02d7de9d97019bb45"
+  },
+  "media/imagery/global.jpg": {
+   "bytes": 304051,
+   "sha256": "c28a9eb8fc1a823cb881605e224844011673c8a74edb31c125709c9da96bbc5f"
+  },
+  "media/imagery/indopac.jpg": {
+   "bytes": 436008,
+   "sha256": "fc6d81a8588a027027a7fa4beab18b0430bd7797cbdb4d445bb7986593a22604"
+  },
+  "media/imagery/mideast.jpg": {
+   "bytes": 227804,
+   "sha256": "4b25da1e8ea829aec6e815aa5255e877858d84a50fdc5ce2fa5078b77d0a79b6"
+  },
+  "media/imagery/namerica.jpg": {
+   "bytes": 185528,
+   "sha256": "de44c7f1da555f667047b2a157fc113133156984ce20e4e5397f3985820be6ce"
+  },
+  "media/imagery/samerica.jpg": {
+   "bytes": 353737,
+   "sha256": "cdae5dd6a5040cc675301dbba363d6934670d5bdafee89c335009a7bf3f4f1ee"
+  }
+ },
+ "generated": "2026-11-21T11:07:02+00:00"
+}
